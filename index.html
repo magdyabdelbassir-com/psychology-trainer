@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدرب مناهج البحث - إعداد مجدي عبد البصير</title>
+    <!-- استدعاء المكتبات الأساسية عبر CDN لضمان التوافق العالمي -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; margin: 0; padding: 0; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes pop { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .glass-header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 2px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        // --- إعدادات النظام الذكية ---
+        const apiKey = ""; // يتم توفيره تلقائياً عند التشغيل
+        const getFirebaseConfig = () => {
+            try { return JSON.parse(__firebase_config); }
+            catch (e) { return null; }
+        };
+        const firebaseConfig = getFirebaseConfig();
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'magdy-psychology-trainer-v3';
+        
+        // تشغيل Firebase فقط إذا كانت الإعدادات متوفرة
+        if (firebaseConfig && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebaseConfig ? firebase.firestore() : null;
+        const auth = firebaseConfig ? firebase.auth() : null;
+
+        // --- قاعدة بيانات الكوميكس (50 رد مصري) ---
+        const SUCCESS_COMICS = [
+            "يا جامد يا بتاع علم النفس! 😎", "إيه الحلاوة دي يا فنان؟ 🎨", "برنس الليالي والمجال كله 👑", "أنت كينج الإكلينيكي 🦁", "وحش المجرة في المناهج 🌌", 
+            "فنان يا بني والله، زويل الصغير 🧪", "إجابة في الجون يا بطل ⚽", "أيوة كدة يا وديع، اشتغل 🎬", "إنت بتذاكر من ورايا يا دحيح؟ 📚", "يا عيني على الذكاء الخارق ⚡", 
+            "ما شاء الله.. الدحيح وصل يا جدعان 🚀", "إيه ده؟ أنت أكلت الكتاب؟ 🍽️", "تسلم إيدك، إجابة ولا كلمة ✨", "العب يا سمك في بحر العلم 🐟", "إيه الحلاوة دي يا جدع، برافو 👏", 
+            "أنت بروفيسور بجد 👨‍🏫", "الله عليك يا حبيب والديك ❤️", "يا حلاوتك يا جمالك، إجابة ذهب 🏆", "أنت فخر لمصر وللكلية 🇪🇬", "إجابة نموذجية يا ريس 🫡", 
+            "أنت تقعد مكاني يا ابني 🎓", "العبقري اللي كنا مستنيينه 🧠", "يا واد يا مؤمن، إيه النور ده؟ 💡", "دماغك دي ألماظ حر 💎", "عاش يا بطل، كمل يا وحش 💪"
+        ];
+
+        const FAIL_COMICS = [
+            "لا يا راجل؟ أنت متأكد؟ 🤨", "إيه اللي بتقوله ده يا حمادة؟ 🎤", "ركز يا عم، السقوط مر 🍋", "أنت بتألف منهج جديد؟ ✍️", "دي إجابة ولا فزورة رمضان؟ 🌙", 
+            "معلش.. حاول تاني بتركيز 🎯", "لا دي بعيدة أوي يا معلم 🏹", "إنت كنت نايم في المحاضرة؟ 😴", "يا ريتني ما سألتك السؤال ده 🤦‍♂️", "دي إجابة من المريخ دي؟ 👽", 
+            "يا نهار أبيض.. ركز شوية ⚪", "إيه ده يا إش إش؟ ركز يا بابا 🤡", "فكر تاني المنهج بيقول غير كدة 📖", "أنت متأكد إن ده علم نفس؟ 🧪", "راجع الفصل تاني يا حبيبي 🏃‍♂️", 
+            "إنت بتهزر صح؟ قولي إنك بتهزر 🤡", "ده كلام فاضي يا حمادة 😤", "محتاجة قعدة وشاي بالياسمين ☕", "إنت بتكتب موضوع تعبير؟ 📝", "بلاش تأليف يا وحش 🐉", 
+            "هانت والله بس محتاجة قراية 🔍", "أنت شكلك جعان ومحتاج تتغدى 🍔", "ارجع للمنهج وشوف الصح فين 🗺️", "إيه العك ده؟ ركز يابني 🌀", "مش عاجبني الكلام ده، حاول تاني ⚠️"
+        ];
+
+        const QUESTIONS = [
+            // الفصل الأول (1-25)
+            { id: 1, ch: 1, question: "ما هو الأصل اللغوي لكلمة 'علم' (Scientia)؟ وماذا تشير إليه في وقتنا المعاصر؟", modelAnswer: "مشتقة من الكلمة اللاتينية Scientia وتعني المعرفة، وتشير حالياً إلى معنيين: 'المحتوى' (الحقائق) و'المعالجة' (طرق جمع البيانات المنظمة)." },
+            { id: 2, ch: 1, question: "عرف 'العقلية العلمية' (The Scientific Mentality) كما ذكرها وايتهد؟", modelAnswer: "هي افتراض الباحث بأن نظام الكون مهم للعلم، وبأن السلوك يتبع نظاماً طبيعياً يمكن التنبؤ به." },
+            { id: 3, ch: 1, question: "ما المقصود بمبدأ 'الحتمية' (Determinism) في البحث النفسي؟", modelAnswer: "هو الاعتقاد بأن أي سلوك يصدر من الفرد يقف وراءه سبب محدد يمكن اكتشافه من خلال البحث." },
+            { id: 4, ch: 1, question: "لماذا يعد جمع 'المعلومات الإمبريقية' (Empirical Data) ركيزة في العلم؟", modelAnswer: "لأنها معلومات تعتمد على الملاحظة الحسية المباشرة التي مر بها الفرد بنفسه ويمكن التحقق منها واختبارها." },
+            { id: 5, ch: 1, question: "ما الفرق بين 'القانون' و'النظرية' في سياق البحث العلمي؟", modelAnswer: "القانون هو مبدأ عام ينطبق على جميع المواقف، أما النظرية فهي تفسير مؤقت أو اختبار لتوقعات يتم من خلالها فهم الظواهر والتنبؤ بها." },
+            { id: 6, ch: 1, question: "اذكر ثلاثة من خصائص التفكير العلمي الجيد؟", modelAnswer: "التنظيم، الموضوعية، المنطقية، الانفتاح على الأفكار الجديدة، وتجنب الافتراضات غير الضرورية." },
+            { id: 7, ch: 1, question: "ما أهمية 'الإعادة' (Replication) في العلوم النفسية؟", modelAnswer: "تكتسب أهميتها للتأكد من صحة النتائج، خاصة إذا كانت لها تطبيقات عملية أو تناقض المعارف الموجودة، لضمان موضوعية البحث." },
+            { id: 8, ch: 1, question: "عرف 'الموضوعية' بمعنييها في البحث العلمي؟", modelAnswer: "المعنى الأول: البعد عن الأهواء الذاتية عند الحكم، والمعنى الثاني: اتفاق أكثر من باحث في تسجيل خصائص الظاهرة بنفس الدرجة." },
+            { id: 9, ch: 1, question: "ما المقصود بـ 'التعريف الإجرائي'؟", modelAnswer: "هو الذي يحدد الإجراءات أو العمليات الضرورية لقياس المتغيرات (مثل تعريف الجوع بعدد ساعات الحرمان من الطعام)." },
+            { id: 10, ch: 1, question: "لماذا يتسم العلم بالطابع 'التراكمي غير الشخصي'؟", modelAnswer: "لأنه يضاف إلى التراث الإنساني المشترك ويفقد طابعه الشخصي بانتمائه لعالم معين بمجرد التحقق منه وتكراره." },
+            { id: 11, ch: 1, question: "ما هي الأهداف الأربعة للفهم العلمي؟", modelAnswer: "الوصف، التنبؤ، تحديد السببية، والتفسير." },
+            { id: 12, ch: 1, question: "وضح كيف يساعد 'الوصف' في فهم ظاهرة 'الأسى'؟", modelAnswer: "من خلال تحديد مظاهرها (حزن، اكتئاب، بكاء) مما يتيح التمييز بين فئات الظاهرة وتسجيل تكرار حدوثها." },
+            { id: 13, ch: 1, question: "ما هو الفرق بين 'الشرط الضروري' و'الشرط الكافي' في السببية؟", modelAnswer: "الشرط الضروري يجب توافره لحدوث الأثر (مثل الكحول للسكر)، أما الكافي فهو الذي يحدث النتيجة دائماً (مثل تدمير العصب السمعي لفقد السمع)." },
+            { id: 14, ch: 1, question: "اذكر المبادئ الأربعة التي حددها 'جون ستيوارت ميل' لتحديد السببية؟", modelAnswer: "منهج الاتفاق، منهج الاختلاف، منهج الاتفاق والاختلاف، ومنهج التغير التلازمي." },
+            { id: 15, ch: 1, question: "ما هو مفهوم 'التفسير' كهدف رابع للعلم؟", modelAnswer: "هو الإجابة عن سؤال 'لماذا تحدث الظاهرة؟' ويتطلب معرفة الشروط العميقة التي أدت لنشوئها." },
+            { id: 16, ch: 1, question: "عدد الخطوات النموذجية في البحث العلمي؟", modelAnswer: "تشخيص المشكلة، تقرير المشكلة، صياغة الفرضيات، توقع النتائج، واختبار الفرضيات." },
+            { id: 17, ch: 1, question: "ما هي 'الملاحظة' كأداة من أدوات العلوم النفسية؟", modelAnswer: "هي المشاهدة والتسجيل المنظم للأحداث التي يمكن ملاحظتها مباشرة أو الاستدلال عليها من خلال مؤشراتها." },
+            { id: 18, ch: 1, question: "عرف 'القياس النفسي' حسب تعريف 'كرونباخ'؟", modelAnswer: "هو الطريقة المنظمة لمقارنة سلوك شخصين أو أكثر، وإعطاء قيمة رقمية للسمات النفسية وفق قواعد محددة." },
+            { id: 19, ch: 1, question: "ما هي الفوائد الثلاث للقياس الكمي في علم النفس؟", modelAnswer: "مرونة الوصف (الفروق الفردية)، التفسير (مقارنة الأداء بمعيار)، واختزال البيانات (استخدام الإحصاء)." },
+            { id: 20, ch: 1, question: "متى يتعذر استخدام 'المنهج التجريبي' لأسباب أخلاقية؟", modelAnswer: "عندما يترتب على التجربة أذى للمشاركين (مثل اختبار أثر التدخين على الجنين أو تغيير درجات الطلاب عمداً)." },
+            { id: 21, ch: 1, question: "ما أهمية 'الصدق الداخلي' في التجريب؟", modelAnswer: "التأكد من أن النتائج تعزى للمتغير المستقل فقط وليس لعوامل دخيلة." },
+            { id: 22, ch: 1, question: "اذكر ثلاثة اعتبارات أخلاقية يجب على الباحث النفسي الالتزام بها؟", modelAnswer: "عدم تزييف البيانات، المحافظة على سلامة المبحوثين، والالتزام بالسرية والنزاهة." },
+            { id: 23, ch: 1, question: "ما المقصود بـ 'الاستنتاج الاحتمالي' في العلوم الاجتماعية؟", modelAnswer: "أن نتائج البحوث ليست يقينية مطلقة بل احتمالية الصحة، وتتحسن درجتها مع تقدم المنهجيات." },
+            { id: 24, ch: 1, question: "كيف يساهم 'التفكير الاستنباطي' و'الاستقرائي' في البحث؟", modelAnswer: "الاستنباطي لاستخلاص فرضيات من نظريات، والاستقرائي لاستخلاص نتائج من بيانات واقعية." },
+            { id: 25, ch: 1, question: "ما هي أوجه قصور الطريقة العلمية في العلوم الاجتماعية؟", modelAnswer: "تعقد موضوع البحث، صعوبات الملاحظة والتكرار، والتفاعل بين الملاحظ والأفراد." },
+            // الفصل الثاني (26-50)
+            { id: 26, ch: 2, question: "ما هو الهدف الرئيسي من 'البحث الأساسي' (Basic Research)؟", modelAnswer: "الإضافة إلى المعرفة العلمية واكتشاف علاقات ومبادئ عامة بغض النظر عن تطبيقاتها المباشرة." },
+            { id: 27, ch: 2, question: "عرف 'البحث التطبيقي' (Applied Research)؟", modelAnswer: "هو الذي يهتم بتطبيق المعرفة الجديدة في حل المشكلات وتحسين الواقع العملي." },
+            { id: 28, ch: 2, question: "ما الفرق بين البحث الكمي والنوعي من حيث 'الأدوات'؟", modelAnswer: "الكمي يستخدم الاختبارات والاستبيانات المقننة، أما النوعي فيستخدم الملاحظة المباشرة، المقابلة المعمقة، وفحص الوثائق." },
+            { id: 29, ch: 2, question: "اذكر ميزتين من مميزات 'البحث النوعي' (Qualitative Research)؟", modelAnswer: "الفهم المتعمق للظاهرة في سياقها الطبيعي، والتركيز على منظور المشاركين ومشاعرهم." },
+            { id: 30, ch: 2, question: "ما هي مراحل البحث الكمي الخمس؟", modelAnswer: "تحديد المشكلة، تحديد الأهداف والفرضيات، جمع البيانات، تحليل البيانات، وكتابة النتائج والتوصيات." },
+            { id: 31, ch: 2, question: "عرف 'المسح الاجتماعي' كطريقة من طرق البحوث الكمية؟", modelAnswer: "هو تسجيل وتفسير الوضع الراهن لجماعة أو بيئة بهدف التخطيط المستقبلي." },
+            { id: 32, ch: 2, question: "ما هو 'البحث التاريخي'؟", modelAnswer: "بحث يهتم بجمع الحقائق من الوثائق والسجلات لدراسة الماضي بهدف فهم الحاضر والتنبؤ المستقبل." },
+            { id: 33, ch: 2, question: "قارن بين 'المصادر الأولية' و'الثانوية' في البحث التاريخي؟", modelAnswer: "الأولية هي الوثائق الأصلية أو شهادة شهود عيان، أما الثانوية فهي نسخ عن الأصل أو تقارير مكتوبة عن أشخاص آخرين." },
+            { id: 34, ch: 2, question: "ما الفرق بين 'النقد الداخلي' و'الخارجي' للوثائق التاريخية؟", modelAnswer: "الخارجي يتعلق بموثوقية وسلامة الوثيقة مادياً، والداخلي يتعلق بمصداقية المحتوى وتوافقه مع الزمن والأدلة الأخرى." },
+            { id: 35, ch: 2, question: "عرف 'البحث الوصفي'؟", modelAnswer: "هو البحث الذي يدرس الظاهرة كما هي في الواقع ويهتم بوصفها نوعياً (خصائص) أو كمياً (أرقام ونسب)." },
+            { id: 36, ch: 2, question: "ما هي 'دراسة الحالة' (Case Study)؟", modelAnswer: "دراسة تهتم بحالة فرد أو جماعة بأسلوب معمق من خلال جمع معلومات عن الوضع الحالي والسابق." },
+            { id: 37, ch: 2, question: "متى نستخدم 'الدراسات العلية المقارنة'؟", modelAnswer: "عندما نبحث عن أسباب حدوث الظاهرة من خلال مقارنتها بظواهر أخرى لاكتشاف العوامل المصاحبة." },
+            { id: 38, ch: 2, question: "ما المقصود بـ 'الدراسات الارتباطية'؟", modelAnswer: "الدراسات التي تكشف عن قوة واتجاه العلاقة بين متغيرين أو أكثر وتعبّر عنها كمياً بمعامل الارتباط." },
+            { id: 39, ch: 2, question: "قارن بين 'الدراسات الطولية' و'المستعرضة' في دراسات النمو؟", modelAnswer: "الطولية تتابع نفس الأفراد لفترة زمنية طويلة، أما المستعرضة فتختار مجموعات في أعمار مختلفة وتقيس المتغير في وقت واحد." },
+            { id: 40, ch: 2, question: "ما هو هدف 'دراسات الاتجاه' (Trend Studies)؟", modelAnswer: "دراسة الظاهرة في واقعها الحالي والماضي للتنبؤ بما يمكن أن يحدث لها في المستقبل." },
+            { id: 41, ch: 2, question: "عرف 'البحث التجريبي'؟", modelAnswer: "هو تغيير معتمد ومضبوط للشروط المحددة للظاهرة وملاحظة نواتج هذا التغير." },
+            { id: 42, ch: 2, question: "ما هي 'المجموعة التجريبية' و'المجموعة الضابطة'؟", modelAnswer: "التجريبية هي التي تتعرض للمتغير المستقل (الجديد)، والضابطة هي التي تبقى تحت ظروف عادية للمقارنة." },
+            { id: 43, ch: 2, question: "عرف 'المتغير المستقل' و'المتغير التابع'؟", modelAnswer: "المستقل هو الذي يتحكم فيه الباحث لقياس أثره، والتابع هو الذي يتأثر بالمتغير المستقل ويتم قياسه." },
+            { id: 44, ch: 2, question: "ما هو 'البحث الإجرائي' (Action Research)؟", modelAnswer: "بحث يعالج مشكلة مباشرة تواجه الباحث في ميدان عمله بهدف زيادة فاعلية الطرق المستخدمة." },
+            { id: 45, ch: 2, question: "اذكر ثلاثة من سمات البحث النوعي (الكيفي)؟", modelAnswer: "الباحث أداة رئيسية (منغمس في الموقف)، البيانات كلمات وصور، والتحليل استدلالي يهتم بالمشاعر." },
+            { id: 46, ch: 2, question: "ما هي 'السوسيومترية' (Sociometry)؟", modelAnswer: "طريقة لقياس درجة الانجذاب والتنافر بين الأفراد في الجماعة باستخدام الاستبيان أو اللقاء الشخصي." },
+            { id: 47, ch: 2, question: "لماذا يفضل البعض البحث النوعي رغم صعوبة تعميم نتائجه؟", modelAnswer: "لأنه يكمل البحوث الكمية ويوفر فهماً عميقاً للحالات المنفردة والظواهر الإنسانية المعقدة." },
+            { id: 48, ch: 2, question: "ما هي معايير صياغة 'مشكلة البحث' الجيدة؟", modelAnswer: "وضوح الصياغة، التعبير عن علاقة بين متغيرات، والقابلية للاختبار والتحقق." },
+            { id: 49, ch: 2, question: "اذكر أهمية 'خطة البحث' قبل البدء بالدراسة؟", modelAnswer: "تصف الإجراءات بالتفصيل، توجه خطوات الدراسة، وتعد معياراً لتقويمها بعد الانتهاء." },
+            { id: 50, ch: 2, question: "كيف يتم 'تحليل البيانات' في البحوث الكمية؟", modelAnswer: "باستخدام الإحصاء الوصفي (نزعة مركزية وتشتت) أو الإحصاء الاستدلالي (علاقات وفروق وتنبؤ)." }
+        ];
+
+        function App() {
+            const [user, setUser] = useState(null);
+            const [currentIdx, setCurrentIdx] = useState(0);
+            const [activeChapter, setActiveChapter] = useState(1);
+            const [userAnswer, setUserAnswer] = useState("");
+            const [feedback, setFeedback] = useState(null);
+            const [isLoading, setIsLoading] = useState(false);
+            const [cloudProgress, setCloudProgress] = useState({});
+            const [comic, setComic] = useState("");
+            const scrollRef = useRef(null);
+
+            // المصادقة
+            useEffect(() => {
+                const initAuth = async () => {
+                    if (!auth) return;
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else {
+                            await auth.signInAnonymously();
+                        }
+                    } catch (e) { console.error("Auth unavailable"); }
+                };
+                initAuth();
+                const unsubscribe = auth ? auth.onAuthStateChanged(setUser) : () => {};
+                return () => unsubscribe();
+            }, []);
+
+            // مزامنة البيانات
+            useEffect(() => {
+                if (!user || !db) return;
+                const progressRef = db.doc(`artifacts/${appId}/users/${user.uid}/progress/data`);
+                const unsubscribe = progressRef.onSnapshot((doc) => {
+                    if (doc.exists) setCloudProgress(doc.data().answers || {});
+                }, (err) => console.log("Cloud sync paused"));
+                return () => unsubscribe();
+            }, [user]);
+
+            const saveToCloud = async (qId, status, explanation, text) => {
+                if (!user || !db) return;
+                const progressRef = db.doc(`artifacts/${appId}/users/${user.uid}/progress/data`);
+                const updated = { ...cloudProgress, [qId]: { status, explanation, text, ts: Date.now() } };
+                await progressRef.set({ answers: updated }, { merge: true });
+            };
+
+            const evaluate = async () => {
+                if (!userAnswer.trim() || isLoading) return;
+                setIsLoading(true);
+                setFeedback(null);
+
+                const currentQ = QUESTIONS[currentIdx];
+                const systemPrompt = `أنت أستاذ مناهج بحث علمي مصري فكاهي. قيم إجابة الطالب بمرونة تامة. اقبل العامية المصرية. ركز على جوهر المعنى. رد بصيغة JSON فقط: {"status": "correct|partial|wrong", "explanation": "شرح مصري فكاهي قصير"}`;
+                const userPrompt = `السؤال: ${currentQ.question}\nالإجابة النموذجية: ${currentQ.modelAnswer}\nإجابة الطالب: ${userAnswer}`;
+
+                const callAPI = async (retries = 3) => {
+                    try {
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: userPrompt }] }],
+                                systemInstruction: { parts: [{ text: systemPrompt }] },
+                                generationConfig: { responseMimeType: "application/json", maxOutputTokens: 600 }
+                            })
+                        });
+                        if (!res.ok) throw new Error();
+                        return await res.json();
+                    } catch (e) {
+                        if (retries > 0) return await callAPI(retries - 1);
+                        throw e;
+                    }
+                };
+
+                try {
+                    const data = await callAPI();
+                    const raw = data.candidates[0].content.parts[0].text;
+                    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+                    if (!jsonMatch) throw new Error();
+                    const result = JSON.parse(jsonMatch[0]);
+
+                    const list = result.status === 'wrong' ? FAIL_COMICS : SUCCESS_COMICS;
+                    setComic(list[Math.floor(Math.random() * list.length)]);
+                    setFeedback(result);
+                    await saveToCloud(currentQ.id, result.status, result.explanation, userAnswer);
+                    
+                    setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+                } catch (e) {
+                    setFeedback({ status: "error", explanation: "يا بطل النت فيه مشكلة أو السيستم مهنج شوية.. دوس على الزرار تاني." });
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const currentQ = QUESTIONS[currentIdx];
+            const savedProgress = cloudProgress[currentQ.id];
+
+            return (
+                <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-12" dir="rtl">
+                    <header className="glass-header sticky top-0 z-50 p-4">
+                        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-indigo-600 p-3 rounded-2xl text-white shadow-lg shadow-indigo-200">🧠</div>
+                                <div>
+                                    <h1 className="text-xl font-black tracking-tight">مدرب مناهج البحث الذكي</h1>
+                                    <p className="text-xs text-indigo-500 font-bold italic">إعداد: مجدي عبد البصير</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 bg-white px-6 py-2 rounded-2xl border shadow-sm">
+                                <div className="text-center"><span className="block text-[8px] font-black text-slate-400">المحلول</span><span className="font-black text-indigo-600">{Object.keys(cloudProgress).length} / 50</span></div>
+                                <div className="w-[1px] bg-slate-200 mx-2"></div>
+                                <div className="text-center"><span className="block text-[8px] font-black text-slate-400 uppercase tracking-widest">صح</span><span className="font-black text-emerald-500">{Object.values(cloudProgress).filter(v => v.status === 'correct').length}</span></div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="max-w-6xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <aside className="lg:col-span-4 space-y-6">
+                            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200">
+                                <div className="flex gap-2 mb-6 p-1 bg-slate-100 rounded-2xl border">
+                                    <button onClick={() => setActiveChapter(1)} className={`flex-1 py-3 rounded-xl font-black text-sm transition-all ${activeChapter === 1 ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}>الفصل الأول</button>
+                                    <button onClick={() => setActiveChapter(2)} className={`flex-1 py-3 rounded-xl font-black text-sm transition-all ${activeChapter === 2 ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}>الفصل الثاني</button>
+                                </div>
+                                <div className="grid grid-cols-5 gap-3 max-h-[350px] overflow-y-auto p-2 custom-scrollbar">
+                                    {QUESTIONS.map((q, i) => {
+                                        if (q.ch !== activeChapter) return null;
+                                        const state = cloudProgress[q.id];
+                                        return (
+                                            <button key={q.id} onClick={() => { setCurrentIdx(i); setFeedback(null); setUserAnswer(cloudProgress[q.id]?.text || ""); }}
+                                                className={`aspect-square rounded-xl flex items-center justify-center font-black text-xs border-2 transition-all ${currentIdx === i ? 'border-indigo-600 bg-indigo-50 text-indigo-600 scale-105 shadow-md' : state?.status === 'correct' ? 'bg-emerald-500 border-emerald-500 text-white' : state?.status === 'partial' ? 'bg-amber-400 border-amber-400 text-white' : state?.status === 'wrong' ? 'bg-rose-50 border-rose-500 text-white' : 'bg-white text-slate-300 hover:border-slate-300'}`}>
+                                                {q.id}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                               <h4 className="font-black text-xl mb-4">نصائح السيستم:</h4>
+                               <ul className="text-sm space-y-3 font-bold list-disc list-inside opacity-90">
+                                  <li>الموقع بيفهم "معنى" كلامك مش الكلمات.</li>
+                                  <li>إجاباتك بتتحفظ أوتوماتيك في السحابة.</li>
+                                  <li>لو النت فصل، دوس "قيم إجابتي" لما يرجع.</li>
+                               </ul>
+                            </div>
+                        </aside>
+
+                        <div className="lg:col-span-8">
+                            <section className="bg-white rounded-[3rem] shadow-xl p-8 md:p-14 border border-slate-100 relative overflow-hidden animate-pop">
+                                <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-indigo-500 to-indigo-700"></div>
+                                <div className="space-y-10">
+                                    <div className="flex justify-between items-center"><span className="bg-indigo-50 text-indigo-700 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">{currentQ.ch === 1 ? 'مدخل المناهج' : 'أنواع البحوث'}</span><span className="text-slate-200 font-black text-5xl opacity-30">#{currentQ.id}</span></div>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 leading-tight">{currentQ.question}</h2>
+
+                                    <div className="space-y-8">
+                                        <textarea className="w-full p-8 rounded-[3rem] border-4 border-slate-50 focus:border-indigo-100 focus:bg-white transition-all min-h-[250px] text-xl bg-slate-50 shadow-inner outline-none font-medium leading-relaxed"
+                                          placeholder="اكتب اللي فاهمه هنا يا بطل بأسلوبك..." value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)} disabled={isLoading} />
+
+                                        {(!feedback || feedback.status === 'error') ? (
+                                          <button onClick={evaluate} disabled={isLoading || !userAnswer.trim()}
+                                            className={`w-full py-6 rounded-3xl font-black text-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-4 ${!userAnswer.trim() ? 'bg-slate-100 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-700 text-white hover:-translate-y-1'}`}>
+                                            {isLoading ? <><div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div> براجع إجابتك...</> : "قيم إجابتي "}
+                                          </button>
+                                        ) : (
+                                          <div ref={scrollRef} className={`p-10 rounded-[3.5rem] border-4 animate-pop shadow-2xl ${feedback.status === 'correct' ? 'bg-emerald-50 border-emerald-100 text-emerald-900' : feedback.status === 'partial' ? 'bg-amber-50 border-amber-100 text-amber-900' : 'bg-rose-50 border-rose-100 text-rose-900'}`}>
+                                            <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
+                                               <div className={`p-8 rounded-[2.5rem] text-5xl shadow-2xl ${feedback.status === 'correct' ? 'bg-emerald-500 rotate-2' : feedback.status === 'partial' ? 'bg-amber-400 rotate-0' : 'bg-rose-500 -rotate-2'} text-white`}>
+                                                 {feedback.status === 'correct' ? '🤩' : feedback.status === 'partial' ? '🧐' : '🤨'}
+                                               </div>
+                                               <div className="flex-1 text-center md:text-right space-y-1">
+                                                  <h3 className="font-black text-3xl leading-tight">{comic}</h3>
+                                                  <p className="text-xl font-bold opacity-80">{feedback.explanation}</p>
+                                               </div>
+                                            </div>
+                                            <div className="bg-white/60 p-8 rounded-[2.5rem] border border-white/50 space-y-4 mb-10 shadow-inner">
+                                               <span className="text-xs font-black text-indigo-600 uppercase tracking-widest block mb-2 underline decoration-2 underline-offset-4">الإجابة المعتمدة (مهم تقراها):</span>
+                                               <p className="text-sm italic text-slate-600 leading-relaxed font-arabic">{currentQ.modelAnswer}</p>
+                                            </div>
+                                            <div className="flex flex-col sm:flex-row gap-4">
+                                               <button onClick={() => setFeedback(null)} className="flex-1 bg-white text-slate-800 py-5 rounded-2xl font-black border-2 border-slate-100 hover:bg-slate-50 transition-all">تعديل إجابتي</button>
+                                               <button onClick={() => { const next = (currentIdx + 1) % QUESTIONS.length; setCurrentIdx(next); setFeedback(null); setUserAnswer(cloudProgress[QUESTIONS[next].id]?.text || ""); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                                 className="flex-[2] bg-slate-900 text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl">السؤال التالي</button>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {feedback?.status === 'error' && <p className="text-center text-rose-600 font-bold bg-rose-50 p-4 rounded-2xl animate-pulse">{feedback.explanation}</p>}
+                                        {savedProgress && !feedback && <div className="flex items-center justify-center gap-3 text-emerald-500 py-6 animate-pulse"><span className="text-xs font-black tracking-widest uppercase">تم استعادة إجابتك السابقة بنجاح ✅</span></div>}
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </main>
+                    <footer className="text-center py-10 opacity-30 text-[10px] font-black uppercase tracking-[0.2em]">نظام التدريب الذكي - إعداد مجدي عبد البصير - 2026</footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
