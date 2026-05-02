@@ -29,22 +29,20 @@
         const { useState, useEffect, useMemo, useRef } = React;
 
         // --- إعدادات النظام الذكية ---
-        const apiKey = ""; // يتم توفيره تلقائياً عند التشغيل
+        const apiKey = ""; // يتم توفيره تلقائياً عند التشغيل في البيئة
         const getFirebaseConfig = () => {
             try { return JSON.parse(__firebase_config); }
             catch (e) { return null; }
         };
         const firebaseConfig = getFirebaseConfig();
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'magdy-psychology-trainer-v3';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'magdy-psychology-trainer-v4';
         
-        // تشغيل Firebase فقط إذا كانت الإعدادات متوفرة
         if (firebaseConfig && !firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebaseConfig ? firebase.firestore() : null;
         const auth = firebaseConfig ? firebase.auth() : null;
 
-        // --- قاعدة بيانات الكوميكس (50 رد مصري) ---
         const SUCCESS_COMICS = [
             "يا جامد يا بتاع علم النفس! 😎", "إيه الحلاوة دي يا فنان؟ 🎨", "برنس الليالي والمجال كله 👑", "أنت كينج الإكلينيكي 🦁", "وحش المجرة في المناهج 🌌", 
             "فنان يا بني والله، زويل الصغير 🧪", "إجابة في الجون يا بطل ⚽", "أيوة كدة يا وديع، اشتغل 🎬", "إنت بتذاكر من ورايا يا دحيح؟ 📚", "يا عيني على الذكاء الخارق ⚡", 
@@ -88,7 +86,7 @@
             { id: 23, ch: 1, question: "ما المقصود بـ 'الاستنتاج الاحتمالي' في العلوم الاجتماعية؟", modelAnswer: "أن نتائج البحوث ليست يقينية مطلقة بل احتمالية الصحة، وتتحسن درجتها مع تقدم المنهجيات." },
             { id: 24, ch: 1, question: "كيف يساهم 'التفكير الاستنباطي' و'الاستقرائي' في البحث؟", modelAnswer: "الاستنباطي لاستخلاص فرضيات من نظريات، والاستقرائي لاستخلاص نتائج من بيانات واقعية." },
             { id: 25, ch: 1, question: "ما هي أوجه قصور الطريقة العلمية في العلوم الاجتماعية؟", modelAnswer: "تعقد موضوع البحث، صعوبات الملاحظة والتكرار، والتفاعل بين الملاحظ والأفراد." },
-            // الفصل الثاني (26-50)
+            // الفصل الثاني
             { id: 26, ch: 2, question: "ما هو الهدف الرئيسي من 'البحث الأساسي' (Basic Research)؟", modelAnswer: "الإضافة إلى المعرفة العلمية واكتشاف علاقات ومبادئ عامة بغض النظر عن تطبيقاتها المباشرة." },
             { id: 27, ch: 2, question: "عرف 'البحث التطبيقي' (Applied Research)؟", modelAnswer: "هو الذي يهتم بتطبيق المعرفة الجديدة في حل المشكلات وتحسين الواقع العملي." },
             { id: 28, ch: 2, question: "ما الفرق بين البحث الكمي والنوعي من حيث 'الأدوات'؟", modelAnswer: "الكمي يستخدم الاختبارات والاستبيانات المقننة، أما النوعي فيستخدم الملاحظة المباشرة، المقابلة المعمقة، وفحص الوثائق." },
@@ -127,7 +125,7 @@
             const [comic, setComic] = useState("");
             const scrollRef = useRef(null);
 
-            // المصادقة
+            // المصادقة وتتبع الحالة (Rule 3)
             useEffect(() => {
                 const initAuth = async () => {
                     if (!auth) return;
@@ -137,20 +135,20 @@
                         } else {
                             await auth.signInAnonymously();
                         }
-                    } catch (e) { console.error("Auth unavailable"); }
+                    } catch (e) { console.log("Auth System Initializing..."); }
                 };
                 initAuth();
                 const unsubscribe = auth ? auth.onAuthStateChanged(setUser) : () => {};
                 return () => unsubscribe();
             }, []);
 
-            // مزامنة البيانات
+            // مزامنة البيانات السحابية (Rule 1)
             useEffect(() => {
                 if (!user || !db) return;
                 const progressRef = db.doc(`artifacts/${appId}/users/${user.uid}/progress/data`);
                 const unsubscribe = progressRef.onSnapshot((doc) => {
                     if (doc.exists) setCloudProgress(doc.data().answers || {});
-                }, (err) => console.log("Cloud sync paused"));
+                }, (err) => console.log("Waiting for stable connection..."));
                 return () => unsubscribe();
             }, [user]);
 
@@ -161,37 +159,48 @@
                 await progressRef.set({ answers: updated }, { merge: true });
             };
 
+            // وظيفة التقييم المحسنة مع نظام الـ Retry والفلترة الذكية
             const evaluate = async () => {
                 if (!userAnswer.trim() || isLoading) return;
                 setIsLoading(true);
                 setFeedback(null);
 
                 const currentQ = QUESTIONS[currentIdx];
-                const systemPrompt = `أنت أستاذ مناهج بحث علمي مصري فكاهي. قيم إجابة الطالب بمرونة تامة. اقبل العامية المصرية. ركز على جوهر المعنى. رد بصيغة JSON فقط: {"status": "correct|partial|wrong", "explanation": "شرح مصري فكاهي قصير"}`;
+                const systemPrompt = `أنت أستاذ مناهج بحث علمي مصري فكاهي. قيم إجابة الطالب بمرونة تامة. اقبل العامية المصرية. ركز على جوهر المعنى. رد بصيغة JSON فقط دون أي نصوص إضافية: {"status": "correct|partial|wrong", "explanation": "شرح مصري فكاهي قصير"}`;
                 const userPrompt = `السؤال: ${currentQ.question}\nالإجابة النموذجية: ${currentQ.modelAnswer}\nإجابة الطالب: ${userAnswer}`;
 
-                const callAPI = async (retries = 3) => {
-                    try {
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: userPrompt }] }],
-                                systemInstruction: { parts: [{ text: systemPrompt }] },
-                                generationConfig: { responseMimeType: "application/json", maxOutputTokens: 600 }
-                            })
-                        });
-                        if (!res.ok) throw new Error();
-                        return await res.json();
-                    } catch (e) {
-                        if (retries > 0) return await callAPI(retries - 1);
-                        throw e;
+                // نظام المحاولات المتكررة (Exponential Backoff)
+                const callAPI = async (retries = 5) => {
+                    const delays = [1000, 2000, 4000, 8000, 16000];
+                    for (let i = 0; i < retries; i++) {
+                        try {
+                            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    contents: [{ parts: [{ text: userPrompt }] }],
+                                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                                    generationConfig: { 
+                                        responseMimeType: "application/json", 
+                                        maxOutputTokens: 1000,
+                                        temperature: 0.2 // تقليل درجة الحرارة لزيادة استقرار الـ JSON
+                                    }
+                                })
+                            });
+                            if (!res.ok) throw new Error();
+                            return await res.json();
+                        } catch (e) {
+                            if (i === retries - 1) throw e;
+                            await new Promise(r => setTimeout(r, delays[i]));
+                        }
                     }
                 };
 
                 try {
                     const data = await callAPI();
                     const raw = data.candidates[0].content.parts[0].text;
+                    
+                    // استخراج الـ JSON بشكل آمن حتى لو وجد نصوص زائدة
                     const jsonMatch = raw.match(/\{[\s\S]*\}/);
                     if (!jsonMatch) throw new Error();
                     const result = JSON.parse(jsonMatch[0]);
@@ -203,7 +212,7 @@
                     
                     setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
                 } catch (e) {
-                    setFeedback({ status: "error", explanation: "يا بطل النت فيه مشكلة أو السيستم مهنج شوية.. دوس على الزرار تاني." });
+                    setFeedback({ status: "error", explanation: "يا بطل النت فيه مشكلة أو السيستم مهنج شوية.. دوس على الزرار تاني كدة." });
                 } finally {
                     setIsLoading(false);
                 }
@@ -238,7 +247,7 @@
                                     <button onClick={() => setActiveChapter(1)} className={`flex-1 py-3 rounded-xl font-black text-sm transition-all ${activeChapter === 1 ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}>الفصل الأول</button>
                                     <button onClick={() => setActiveChapter(2)} className={`flex-1 py-3 rounded-xl font-black text-sm transition-all ${activeChapter === 2 ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}>الفصل الثاني</button>
                                 </div>
-                                <div className="grid grid-cols-5 gap-3 max-h-[350px] overflow-y-auto p-2 custom-scrollbar">
+                                <div className="grid grid-cols-5 gap-3 max-h-[450px] overflow-y-auto p-2 custom-scrollbar">
                                     {QUESTIONS.map((q, i) => {
                                         if (q.ch !== activeChapter) return null;
                                         const state = cloudProgress[q.id];
@@ -253,10 +262,10 @@
                             </div>
                             <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
                                <h4 className="font-black text-xl mb-4">نصائح السيستم:</h4>
-                               <ul className="text-sm space-y-3 font-bold list-disc list-inside opacity-90">
+                               <ul className="text-sm space-y-3 font-bold list-disc list-inside opacity-90 leading-relaxed">
                                   <li>الموقع بيفهم "معنى" كلامك مش الكلمات.</li>
                                   <li>إجاباتك بتتحفظ أوتوماتيك في السحابة.</li>
-                                  <li>لو النت فصل، دوس "قيم إجابتي" لما يرجع.</li>
+                                  <li>لو السيستم هنج، متقلقش إجابتك محفوظة، دوس قيم تاني.</li>
                                </ul>
                             </div>
                         </aside>
@@ -275,17 +284,16 @@
                                         {(!feedback || feedback.status === 'error') ? (
                                           <button onClick={evaluate} disabled={isLoading || !userAnswer.trim()}
                                             className={`w-full py-6 rounded-3xl font-black text-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-4 ${!userAnswer.trim() ? 'bg-slate-100 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-700 text-white hover:-translate-y-1'}`}>
-                                            {isLoading ? <><div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div> براجع إجابتك...</> : "قيم إجابتي "}
-                                          </button>
+                                            {isLoading ? <><div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div> براجع إجابتك بعناية...</> : "قيم إجابتي 
                                         ) : (
-                                          <div ref={scrollRef} className={`p-10 rounded-[3.5rem] border-4 animate-pop shadow-2xl ${feedback.status === 'correct' ? 'bg-emerald-50 border-emerald-100 text-emerald-900' : feedback.status === 'partial' ? 'bg-amber-50 border-amber-100 text-amber-900' : 'bg-rose-50 border-rose-100 text-rose-900'}`}>
+                                          <div ref={scrollRef} className={`p-10 rounded-[3.5rem] border-4 animate-pop shadow-2xl ${feedback.status === 'correct' ? 'bg-emerald-50 border-emerald-100 text-emerald-900 shadow-emerald-100' : feedback.status === 'partial' ? 'bg-amber-50 border-amber-100 text-amber-900 shadow-amber-100' : 'bg-rose-50 border-rose-100 text-rose-900 shadow-rose-100'}`}>
                                             <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
                                                <div className={`p-8 rounded-[2.5rem] text-5xl shadow-2xl ${feedback.status === 'correct' ? 'bg-emerald-500 rotate-2' : feedback.status === 'partial' ? 'bg-amber-400 rotate-0' : 'bg-rose-500 -rotate-2'} text-white`}>
                                                  {feedback.status === 'correct' ? '🤩' : feedback.status === 'partial' ? '🧐' : '🤨'}
                                                </div>
                                                <div className="flex-1 text-center md:text-right space-y-1">
                                                   <h3 className="font-black text-3xl leading-tight">{comic}</h3>
-                                                  <p className="text-xl font-bold opacity-80">{feedback.explanation}</p>
+                                                  <p className="text-xl font-bold opacity-80 leading-relaxed">{feedback.explanation}</p>
                                                </div>
                                             </div>
                                             <div className="bg-white/60 p-8 rounded-[2.5rem] border border-white/50 space-y-4 mb-10 shadow-inner">
@@ -293,13 +301,13 @@
                                                <p className="text-sm italic text-slate-600 leading-relaxed font-arabic">{currentQ.modelAnswer}</p>
                                             </div>
                                             <div className="flex flex-col sm:flex-row gap-4">
-                                               <button onClick={() => setFeedback(null)} className="flex-1 bg-white text-slate-800 py-5 rounded-2xl font-black border-2 border-slate-100 hover:bg-slate-50 transition-all">تعديل إجابتي</button>
+                                               <button onClick={() => setFeedback(null)} className="flex-1 bg-white text-slate-800 py-5 rounded-2xl font-black border-2 border-slate-100 hover:bg-slate-50 transition-all shadow-sm">تعديل إجابتي</button>
                                                <button onClick={() => { const next = (currentIdx + 1) % QUESTIONS.length; setCurrentIdx(next); setFeedback(null); setUserAnswer(cloudProgress[QUESTIONS[next].id]?.text || ""); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                                                  className="flex-[2] bg-slate-900 text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl">السؤال التالي</button>
                                             </div>
                                           </div>
                                         )}
-                                        {feedback?.status === 'error' && <p className="text-center text-rose-600 font-bold bg-rose-50 p-4 rounded-2xl animate-pulse">{feedback.explanation}</p>}
+                                        {feedback?.status === 'error' && <p className="text-center text-rose-600 font-bold bg-rose-50 p-4 rounded-2xl animate-pulse shadow-sm border border-rose-100">{feedback.explanation}</p>}
                                         {savedProgress && !feedback && <div className="flex items-center justify-center gap-3 text-emerald-500 py-6 animate-pulse"><span className="text-xs font-black tracking-widest uppercase">تم استعادة إجابتك السابقة بنجاح ✅</span></div>}
                                     </div>
                                 </div>
