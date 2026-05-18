@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>موسوعة الأوبئة | تحدي الذاكرة والمقارنات</title>
+    <title>الموسوعة الشاملة | الأوبئة العقلية</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -41,9 +41,15 @@
         }
         @keyframes moveStars { from { background-position: 0 0; } to { background-position: 100% 100%; } }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 10px; }
+        
+        .inner-scroll::-webkit-scrollbar { width: 4px; }
+        .inner-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        
+        /* For allowing \n to break lines in react */
+        .whitespace-pre-line { white-space: pre-line; }
     </style>
 </head>
 <body class="min-h-screen pb-24 selection:bg-sky-500 selection:text-white">
@@ -63,129 +69,133 @@
         const TeenIcon = () => <span className="text-3xl">🎒</span>;
         const AdultIcon = () => <span className="text-3xl">💼</span>;
 
-        // --- Data (Updated with Stages & Age Groups) ---
+        // --- Data (Exhaustive & Complete Rates & Details without limiting) ---
         const comparisonsData = {
             "طيف الفصام": {
                 arab: [
-                    { country: "مصر", fact: "15.3% (من المترددين على عيادات الطب النفسي)" },
-                    { country: "الإمارات", fact: "0.7% (مدينة العين، انتشار مجتمعي)" },
-                    { country: "لبنان", fact: "ضمن 25.8% (ذهان ككل، حروب ونزوح)" },
-                    { country: "البحرين", fact: "1.29 لكل 10,000 (معدل حدوث سنوي)" }
+                    { country: "مصر", fact: "15.3% من المترددين على عيادات عين شمس. لدى كبار السن: 2% ذكور و 2.5% إناث." },
+                    { country: "الإمارات (العين)", fact: "0.7% معدل انتشار مجتمعي للفصام، متساوٍ بين الذكور والإناث." },
+                    { country: "الإمارات (دبي)", fact: "1.9% انتشار للاضطرابات الذهانية والهوس ككل." },
+                    { country: "البحرين", fact: "1.29 لكل 10,000 معدل حدوث سنوي لجميع الأعمار." },
+                    { country: "لبنان", fact: "25.8% للاضطرابات الذهانية مدى الحياة (الأعلى عربياً بسبب الحروب، النزوح، والضغوط الاقتصادية)." },
+                    { country: "المغرب", fact: "5.6% ذهان. وسجلت أطول متوسط لمدة الذهان غير المعالج (DUP) بواقع 148.7 أسبوعاً." },
+                    { country: "قطر", fact: "1.4% نسبة الذهانات الحادة العابرة (ATPD) بين المرضى، والذهان الشبيه بالفصام شكل 35.6% منها." }
                 ],
                 foreign: [
-                    { country: "السويد", fact: "يصل لـ 3% (من أعلى النسب لدقة الإحصاء)" },
-                    { country: "أمريكا", fact: "1% إلى 1.5% (نسبة ثابتة وتكلفة 100 مليار$)" },
-                    { country: "بريطانيا", fact: "1% (تزداد في الطبقات الدنيا - Social Drift)" },
-                    { country: "عالمياً", fact: "يمثل مرضاه 60% لـ 70% من نزلاء المستشفيات العقلية" }
+                    { country: "السويد", fact: "يصل الانتشار إلى 3% (أعلى من المعدل العالمي، ويُعزى ذلك لدقة التسجيل والإحصاءات الصارمة)." },
+                    { country: "أمريكا", fact: "1% إلى 1.5%. معدل ثابت تقريباً. يشكل عبئاً اقتصادياً فادحاً تكلفته السنوية تقارب 100 مليار دولار." },
+                    { country: "بريطانيا وأوروبا", fact: "متوسط 1%. لوحظ ارتفاع النسبة في الطبقات الاجتماعية الدنيا (بسبب نظرية الانجراف الاجتماعي Social Drift)." },
+                    { country: "عالمياً", fact: "1% لـ 1.5% عالمياً. ورغم ثبات النسبة، يمثل مرضى الفصام وحدهم من 60% إلى 70% من نزلاء المستشفيات العقلية لفترات طويلة." }
                 ],
                 stages: [
                     { 
                         phase: "مرحلة الطفولة", icon: <ChildIcon/>,
-                        male: "نادر جداً، ولكن إن حدث يكون الذكور أكثر عرضة للظهور المبكر.",
-                        female: "نادر للغاية، وتكاد تنعدم الإصابات الموثقة في هذه المرحلة."
+                        male: "• تشخيص نادر جداً (Childhood-Onset Schizophrenia).\n• إذا ظهر، تكون الغلبة الواضحة للذكور.\n• يتميز بوجود شذوذات وتأخر في النمو العصبي، اللغوي، والاجتماعي قبل ظهور المرض.",
+                        female: "• نادر للغاية.\n• تكاد تنعدم الإصابات الموثقة والمؤكدة في هذه المرحلة العمرية المبكرة جداً للإناث."
                     },
                     { 
                         phase: "المراهقة والشباب", icon: <TeenIcon/>,
-                        male: "الذروة الأولى للذكور (15-25 سنة). تكون الأعراض أشد سلبية وأكثر تدهوراً.",
-                        female: "ظهور أقل في هذه المرحلة، حيث تتأخر بداية المرض لديهن."
+                        male: "• الذروة الأولى والأساسية للإصابة (15-25 سنة).\n• يتميز الذكور بتدهور أكبر في الأداء ما قبل المرض (Premorbid).\n• الأعراض السلبية (التبلد، الانعزال) تكون أشد وأكثر وضوحاً.\n• نسب أعلى من تعاطي المواد المخدرة كطبابة ذاتية.",
+                        female: "• ظهور أقل بكثير في هذه المرحلة.\n• تتأخر بداية المرض لديهن مقارنة بالذكور، وتكون هذه المرحلة غالباً طبيعية أكاديمياً واجتماعياً."
                     },
                     { 
                         phase: "البلوغ وكبار السن", icon: <AdultIcon/>,
-                        male: "تقل نسب الحالات الجديدة المكتشفة، ويتحول لمرض مزمن.",
-                        female: "الذروة الأولى للإناث (25-35 سنة)، ولديهن ذروة ثانية بعد الأربعين (انقطاع الطمث)."
+                        male: "• تقل نسب الحالات الجديدة المكتشفة بشكل كبير.\n• يتحول المرض إلى مسار مزمن مع تدهور تدريجي إذا لم يُعالج.",
+                        female: "• الذروة الأولى الأساسية (25-35 سنة).\n• يتميزن بمسار مرضي أفضل واستجابة أحسن لمضادات الذهان.\n• الأعراض الوجدانية/المزاجية تكون أوضح من الأعراض السلبية.\n• ذروة ثانية فريدة للإصابة تظهر بعد سن الأربعين (حول انقطاع الطمث وانخفاض الإستروجين الوقائي)."
                     }
                 ]
             },
             "ثنائي القطب": {
                 arab: [
-                    { country: "مصر", fact: "نسبة ضئيلة بالعيادات (أقل من 1%) مقارنة بالاكتئاب." },
-                    { country: "المغرب العربي", fact: "ضمن 10.6% للاضطرابات المزاجية (المغرب، تونس، الجزائر)." },
-                    { country: "الإمارات", fact: "1.9% للاضطرابات الذهانية والهوس ككل (دبي)." },
-                    { country: "لبنان", fact: "ضمن 12.6% للاضطرابات المزاجية ككل." }
+                    { country: "مصر", fact: "مسجل بنسبة ضئيلة جداً بالعيادات (أقل من 1%) مقارنة بحالات الاكتئاب أحادي القطب." },
+                    { country: "لبنان", fact: "12.6% للاضطرابات المزاجية ككل." },
+                    { country: "المغرب العربي", fact: "10.6% للاضطرابات المزاجية ككل (يضم المغرب، الجزائر، تونس)." },
+                    { country: "الإمارات (دبي)", fact: "1.9% انتشار للاضطرابات الذهانية والهوس ككل." },
+                    { country: "الدول العربية (عام)", fact: "بشكل عام، النسب المسجلة عربياً أقل بكثير من الدول الأجنبية، إما بسبب عدم الدقة في تشخيص (تحت الهوس) أو تداخله مع الاكتئاب العادي." }
                 ],
                 foreign: [
-                    { country: "أمريكا", fact: "0.6% لثنائي القطب I، و 0.8% لثنائي القطب II." },
-                    { country: "السويد", fact: "بين 1% إلى 2%، مع تداخل وراثي واضح." },
-                    { country: "أوروبا", fact: "حوالي 1.3% للبالغين." },
-                    { country: "عالمياً", fact: "متوسط 1% إلى 2.4% (يتزامن مع إدمان الكحوليات بـ 50%)." }
+                    { country: "أمريكا", fact: "0.6% لثنائي القطب I، و 0.8% لثنائي القطب II، و 0.4%-1% لاضطراب المزاجية الدورية (Cyclothymia)." },
+                    { country: "السويد", fact: "بين 1% إلى 2%، وأثبتت الدراسات السويدية التداخل الجيني والوراثي الواضح مع الفصام." },
+                    { country: "أوروبا", fact: "1.3% تقريباً للبالغين، وينخفض المعدل بوضوح في الفئات العمرية الأكبر سناً." },
+                    { country: "عالمياً", fact: "متوسط 1% إلى 2.4%. يتزامن بقوة مع إدمان الكحوليات في 50% من الحالات." }
                 ],
                 stages: [
                     { 
                         phase: "مرحلة الطفولة", icon: <ChildIcon/>,
-                        male: "يصعب تشخيصه بدقة، قد يظهر كعدوانية أو فرط حركة شديد وغير مبرر.",
-                        female: "نادر التشخيص في الطفولة المبكرة."
+                        male: "• يصعب تشخيصه وتفريقه عن اضطراب فرط الحركة (ADHD).\n• لا يظهر كهوس مفرح تقليدي، بل يظهر كعصبية شديدة، تهيج مستمر، ونوبات غضب اندفاعية مبالغ فيها.",
+                        female: "• نادر التشخيص جداً.\n• قد يُشخص خطأ كاضطرابات سلوكية أو قلق."
                     },
                     { 
                         phase: "المراهقة والشباب", icon: <TeenIcon/>,
-                        male: "متوسط الظهور (18 سنة). يميل الذكور لظهور نوبات الهوس الصريح (النوع الأول I).",
-                        female: "بداية الظهور. تميل الإناث للبدء بنوبات اكتئاب تتبعها تحت هوس (النوع الثاني II)."
+                        male: "• متوسط بداية المرض (حوالي 18 سنة).\n• يميل الذكور للبدء بنوبات (هوس صريح Manic Episodes).\n• أكثر عرضة للتشخيص بثنائي القطب من النوع الأول (Bipolar I).",
+                        female: "• بداية الظهور.\n• تميل الإناث للبدء بنوبات اكتئاب كبرى، تتبعها نوبات تحت هوس (Hypomania).\n• غالباً يتم تشخيصهن في البداية بالخطأ كاكتئاب أحادي القطب."
                     },
                     { 
                         phase: "البلوغ وكبار السن", icon: <AdultIcon/>,
-                        male: "زيادة كبيرة في احتمالية الإدمان المرافق للسيطرة على الهوس.",
-                        female: "تكون الإناث أكثر عرضة لنمط التكرار السريع (Rapid Cycling) واكتئاب أطول."
+                        male: "• تصبح نوبات الهوس أقل حدة مع تقدم العمر.\n• ترتفع نسبة الترافق المرضي مع تعاطي الكحوليات والإدمان بصورة ملحوظة كعلاج ذاتي (Self-medication).",
+                        female: "• أكثر عرضة لتشخيص ثنائي القطب النوع الثاني (Bipolar II).\n• الإناث أكثر عرضة بكثير لنمط (التكرار السريع Rapid Cycling) بواقع 4 نوبات أو أكثر سنوياً.\n• نوبات الاكتئاب تستمر لديهن لفترات أطول."
                     }
                 ]
             },
             "الوسواس القهري": {
                 arab: [
-                    { country: "مصر", fact: "2.6% من رواد العيادات (معظمهم شباب 20-30 سنة)." },
-                    { country: "الخليج", fact: "يمثل 4% من إجمالي الاضطرابات العصابية." },
-                    { country: "قطر/البحرين", fact: "10-15% سلوك تكرار بسيط بين طلاب الجامعات." },
-                    { country: "لبنان", fact: "ضمن 16.7% لاضطرابات القلق." }
+                    { country: "مصر", fact: "2.6% من رواد العيادات. معظم المترددين يأتون في مرحلة الشباب (20-30 سنة)." },
+                    { country: "قطر والبحرين", fact: "تم رصد نسبة 10% إلى 15% كسلوك تكرار بسيط (دون المرضي) بين طلاب الجامعات الأسوياء تحت الضغط." },
+                    { country: "لبنان", fact: "16.7% انتشار لاضطرابات القلق ككل (والتي يندرج تحتها الوسواس) وهو المعدل الأعلى." },
+                    { country: "المغرب العربي", fact: "12.7% انتشار لاضطرابات القلق (تونس، الجزائر، المغرب)." },
+                    { country: "الخليج", fact: "يمثل حوالي 4% من إجمالي الاضطرابات العصابية المسجلة." }
                 ],
                 foreign: [
-                    { country: "أمريكا", fact: "2.5% مدى الحياة. (من أشد الاضطرابات ألماً)." },
-                    { country: "بريطانيا", fact: "الرابع عالمياً من حيث الانتشار." },
-                    { country: "السويد", fact: "حوالي 2%، وعلاج معرفي سلوكي مرتفع (CBT)." },
-                    { country: "عالمياً", fact: "النسبة متقاربة جداً بين الجنسين ككل." }
+                    { country: "أمريكا", fact: "2.5% انتشار مدى الحياة. يصنف من أشد الاضطرابات ألماً نفسياً وإعاقة لحياة الفرد (Severity)." },
+                    { country: "بريطانيا", fact: "1.2% انتشار سنوي. ويحتل الترتيب الرابع من حيث الانتشار عالمياً." },
+                    { country: "السويد", fact: "حوالي 2%، وتتميز بارتفاع الوعي المجتمعي والعلاج السلوكي المعرفي المبكر (CBT)." },
+                    { country: "عالمياً", fact: "النسبة العامة الكلية للبالغين متقاربة جداً بين الجنسين ولا يوجد فارق ملحوظ في المجمل، الفارق فقط في سن البداية." }
                 ],
                 stages: [
                     { 
                         phase: "مرحلة الطفولة", icon: <ChildIcon/>,
-                        male: "بداية مبكرة جداً (أسرع من الإناث). حوالي 25% من الذكور يبدأ لديهم قبل العاشرة.",
-                        female: "نسبة الإصابة وبداية الظهور أقل في الطفولة."
+                        male: "• بداية مبكرة جداً. حوالي 25% من الذكور المصابين يبدأ المرض لديهم قبل سن العاشرة.\n• يترافق عادة مع اضطرابات اللزمات الحركية (Tics) ومتلازمة توريت.\n• يميل المحتوى لوساوس التماثل، الترتيب، والعد.",
+                        female: "• أقل عرضة للإصابة في مرحلة الطفولة المبكرة.\n• الأعراض إن وجدت تكون أقل حدة من الذكور في هذه المرحلة."
                     },
                     { 
                         phase: "المراهقة والشباب", icon: <TeenIcon/>,
-                        male: "تستمر الأعراض، وتميل للأفعال القهرية المتعلقة بالترتيب أو التماثل.",
-                        female: "تزداد النسبة وتلحق بالذكور، وغالباً ترتبط ببداية فترة البلوغ."
+                        male: "• تستمر الأعراض بالإلحاح، وقد تتسع لتشمل وساوس دينية وجنسية.\n• يواجهون ضغوطاً متزايدة مع بدء الاستقلال مما يُفجر الاستعداد الوراثي للمرض.",
+                        female: "• تزداد نسبة الظهور بشكل متسارع وتلحق بنسبة الذكور.\n• ترتبط بداية ظهور الأعراض لديهن ببداية فترة البلوغ والتغيرات الهرمونية."
                     },
                     { 
                         phase: "البلوغ وكبار السن", icon: <AdultIcon/>,
-                        male: "تستقر النسبة وتصبح مزمنة.",
-                        female: "تتخطى نسبة الذكور، وتظهر ذروة واضحة مرتبطة بفترات الحمل والولادة (وساوس الأذى للطفل)."
+                        male: "• تستقر نسبة الإصابة ويتحول المرض لنمط مزمن يعالج بأدوية (SSRIs) والعلاج السلوكي.",
+                        female: "• نسبة الإصابة تتخطى الذكور بشكل طفيف.\n• محتوى الوسواس يميل للنظافة والتلوث.\n• تظهر ذروة واضحة وموثقة للإصابة مرتبطة بفترات الحمل وما بعد الولادة (Postpartum OCD)، حيث تتركز الوساوس حول الخوف من إيذاء الطفل أو تلوثه."
                     }
                 ]
             },
             "التحكم في السلوك الاندفاعي": {
                 arab: [
-                    { country: "لبنان", fact: "4.4% انتشار لاضطرابات التحكم في الاندفاعات ككل." },
-                    { country: "دول المغرب", fact: "4.5% (الجزائر، المغرب، تونس)." },
-                    { country: "مصر", fact: "2% بالعيادات لـ(نوبات العدوان الفجائية)، سرقة مخفية." },
-                    { country: "الإمارات", fact: "غياب أرقام دقيقة لطبيعة الوصمة والقانون." }
+                    { country: "لبنان", fact: "4.4% نسبة انتشار اضطرابات التحكم في الاندفاعات (رقم دقيق)." },
+                    { country: "المغرب العربي", fact: "4.5% لاضطرابات التحكم في الاندفاعات (المغرب، الجزائر، تونس)." },
+                    { country: "مصر", fact: "نوبات العدوان الفجائية تمثل 2% بالعيادات. بينما هوس السرقة (Kleptomania) لا توجد له أرقام دقيقة لأنه يبقى مخفياً خوفاً من الفضيحة." },
+                    { country: "الإمارات والخليج", fact: "غياب أرقام أو إحصاءات دقيقة بسبب الطبيعة القانونية والجنائية للمرض، بالإضافة للوصمة الاجتماعية التي تمنع اللجوء للعيادات." }
                 ],
                 foreign: [
-                    { country: "أمريكا", fact: "1% إلى 3% للمقامرة المرضية وحدها." },
-                    { country: "بريطانيا", fact: "العدوان الفجائي يمثل 2%." },
-                    { country: "كندا", fact: "هوس نتف الشعر 2% من الجمهور." },
-                    { country: "عالمياً", fact: "الذكور يتواجدون بالسجون بدلاً من العيادات." }
+                    { country: "أمريكا", fact: "1% إلى 3% للمقامرة المرضية (Pathological Gambling)." },
+                    { country: "كندا", fact: "هوس نتف الشعر (Trichotillomania) يمثل 2% من الجمهور العام." },
+                    { country: "بريطانيا وعالمياً", fact: "نوبات العدوان 2% بالعيادات، لكن في الواقع الذكور المندفعون يتواجدون بكثرة داخل السجون والمؤسسات الإصلاحية الجنائية وليس في المصحات النفسية." }
                 ],
                 stages: [
                     { 
                         phase: "مرحلة الطفولة", icon: <ChildIcon/>,
-                        male: "تظهر مبكراً كاضطرابات مسلك، عناد، عدوانية، وأحياناً القسوة مع الحيوانات (ثالوث ماكدونالد).",
-                        female: "الاندفاعية أقل حدة وعنفاً."
+                        male: "• تظهر البذور مبكراً كـ (اضطرابات المسلك Conduct Disorder) والعناد الشارد.\n• يتميزون بالعدوانية المفرطة تجاه الأقران، وأحياناً القسوة المتعمدة مع الحيوانات أو إشعال النيران (عناصر ثالوث ماكدونالد).",
+                        female: "• الاندفاعية تكون أقل حدة وأقل عنفاً جسدياً.\n• تظهر في أشكال عناد خفيف أو نوبات غضب غير تخريبية."
                     },
                     { 
                         phase: "المراهقة والشباب", icon: <TeenIcon/>,
-                        male: "تتطور لنوبات عدوان فجائي وهوس إشعال حرائق (Pyromania) والمخاطرة.",
-                        female: "تظهر لديهن اندفاعات موجهة للذات كـ هوس نتف الشعر (Trichotillomania)."
+                        male: "• تطور السلوك إلى (نوبات عدوان فجائية Intermittent Explosive Disorder).\n• ظهور هوس إشعال الحرائق (Pyromania) والبدء في سلوكيات المخاطرة والمقامرة.",
+                        female: "• تبرز الاندفاعات الموجهة نحو الذات والجسد كـ (هوس نتف الشعر Trichotillomania).\n• غالباً لا تترافق اندفاعاتهن بإيذاء مادي للآخرين."
                     },
                     { 
                         phase: "البلوغ وكبار السن", icon: <AdultIcon/>,
-                        male: "استمرار المقامرة المرضية والعدوان، وعواقب قانونية ومساءلة.",
-                        female: "يبرز هوس السرقة (Kleptomania) كاستجابة لتخفيف التوتر والقلق، وليس للاحتياج المادي."
+                        male: "• استمرار وتأصل المقامرة المرضية والعدوان الجسدي.\n• الغالبية العظمى يتعرضون للمساءلة القانونية والسجن كعواقب جنائية لاندفاعهم دون تلقي العلاج النفسي المطلوب.",
+                        female: "• يبرز وبقوة (هوس السرقة Kleptomania).\n• السرقة لديهن ليست ناتجة عن احتياج مادي للشيء المسروق، بل تفعلها المريضة لتخفيف التوتر، القلق، أو الاكتئاب كنوع من التفريغ النفسي القهري."
                     }
                 ]
             }
@@ -194,36 +204,43 @@
         // --- Games Data ---
         // Game 1: Gender & Age Challenge
         const genderGameQuestions = [
-            { text: "في مرحلة الطفولة: من يبدأ لديه الوسواس القهري أبكر (حوالي 25% قبل العاشرة)؟", answer: "male" },
-            { text: "في البلوغ: من لديه ذروة ثانية لظهور الفصام بعد سن الأربعين؟", answer: "female" },
-            { text: "في المراهقة: من يميل لظهور نوبات الهوس الصريح في ثنائي القطب كأول نوبة؟", answer: "male" },
-            { text: "في الطفولة: تظهر الاندفاعية لديهم في شكل اضطرابات مسلك وقسوة؟", answer: "male" },
-            { text: "في البلوغ: الوسواس القهري يزداد لديهم ويرتبط بفترات الحمل وما بعد الولادة؟", answer: "female" },
-            { text: "في المراهقة: يميلون لاندفاعات هوس نتف الشعر بدلاً من إشعال الحرائق؟", answer: "female" },
-            { text: "في البلوغ: ثنائي القطب يتزامن لديهم بقوة مع إدمان الكحوليات (50%)؟", answer: "male" },
-            { text: "في الشباب: الفصام يبدأ لديهم متأخراً (25-35 سنة)؟", answer: "female" },
-            { text: "في البلوغ: من يميلون أكثر لهوس السرقة لتخفيف القلق والتوتر؟", answer: "female" }
+            { text: "في مرحلة الطفولة: من يبدأ لديه الوسواس القهري أبكر (25% قبل العاشرة) مقترناً باللزمات الحركية؟", answer: "male" },
+            { text: "في البلوغ: من لديه ذروة ثانية لظهور الفصام بعد سن الأربعين (حول انقطاع الطمث)؟", answer: "female" },
+            { text: "في المراهقة: من يميل لظهور نوبات الهوس الصريح (النوع الأول) في ثنائي القطب كأول نوبة؟", answer: "male" },
+            { text: "في الطفولة: تظهر الاندفاعية لديهم مبكراً كاضطرابات مسلك وقسوة مع الحيوانات؟", answer: "male" },
+            { text: "في البلوغ: الوسواس القهري يزداد لديهم، ويظهر بوضوح في فترات الحمل وما بعد الولادة خوفاً على الطفل؟", answer: "female" },
+            { text: "في المراهقة: يميلون لاندفاعات موجهة للذات كـ (هوس نتف الشعر) بدلاً من التخريب الخارجي؟", answer: "female" },
+            { text: "في البلوغ: ثنائي القطب يتزامن لديهم بقوة مع إدمان الكحوليات بنسبة تصل لـ 50%؟", answer: "male" },
+            { text: "في الشباب: الفصام يبدأ لديهم متأخراً (25-35 سنة) وتكون استجابتهم للأدوية أفضل؟", answer: "female" },
+            { text: "في البلوغ: من يميلون أكثر بكثير لـ (هوس السرقة) كاستجابة قهرية لتخفيف التوتر والاكتئاب وليس للحاجة المادية؟", answer: "female" },
+            { text: "في الشباب: الفصام لديهم يترافق مع أعراض سلبية شديدة وتدهور حاد في الأداء ما قبل المرض؟", answer: "male" },
+            { text: "في البلوغ: الإناث أكثر عرضة لنمط (التكرار السريع Rapid Cycling) في ثنائي القطب بواقع 4 نوبات أو أكثر سنوياً؟", answer: "female" },
+            { text: "في البلوغ وكبار السن: من تتسبب اندفاعاتهم (العدوان والمقامرة) في إلقائهم بالسجون الجنائية بدلاً من المستشفيات؟", answer: "male" }
         ];
 
         // Game 2: Country Maps
         const countryGameQuestions = [
-            { text: "نسبة 15.3% من المترددين على عيادات الطب النفسي (طيف الفصام)", options: ["مصر", "الإمارات", "لبنان", "السويد"], answer: "مصر" },
-            { text: "معدل 25.8% للاضطرابات الذهانية بسبب ظروف النزوح والحروب", options: ["البحرين", "لبنان", "بريطانيا", "أمريكا"], answer: "لبنان" },
-            { text: "انتشار مجتمعي 0.7% بمدينة العين (طيف الفصام متساوٍ بين الجنسين)", options: ["مصر", "الإمارات", "قطر/البحرين", "المغرب العربي"], answer: "الإمارات" },
-            { text: "تصل نسبة الفصام إلى 3% وهي من أعلى النسب عالمياً لدقة التسجيل", options: ["الصين/آسيا", "أمريكا", "السويد", "بريطانيا"], answer: "السويد" },
-            { text: "نسبة الفصام 1-1.5% وتكلفة العلاج باهظة تصل لـ 100 مليار دولار", options: ["بريطانيا", "أمريكا", "كندا", "السويد"], answer: "أمريكا" },
-            { text: "سلوك تكرار بسيط بنسبة 10-15% بين طلاب الجامعات (وسواس قهري)", options: ["مصر", "قطر/البحرين", "لبنان", "الإمارات"], answer: "قطر/البحرين" },
-            { text: "تمثل نوبات العدوان الفجائي 2% بالعيادات وهوس السرقة مخفي", options: ["مصر", "بريطانيا", "كندا", "دول المغرب"], answer: "مصر" }
+            { text: "معدل 1.29 لكل 10,000 كحدوث سنوي لجميع الأعمار (طيف الفصام)", options: ["مصر", "الإمارات (العين)", "لبنان", "البحرين"], answer: "البحرين" },
+            { text: "أطول تأخر في العلاج (DUP) يصل لـ 148.7 أسبوع مع نسبة ذهان 5.6%", options: ["قطر", "لبنان", "المغرب", "مصر"], answer: "المغرب" },
+            { text: "الذهان الشبيه بالفصام شكل 35.6% من إجمالي حالات الذهان الحاد العابر (ATPD)", options: ["قطر", "لبنان", "المغرب العربي", "البحرين"], answer: "قطر" },
+            { text: "معدل انتشار مجتمعي للفصام بلغ 0.7% متساوٍ بين الجنسين بالمدينة", options: ["مصر", "الإمارات (العين)", "قطر", "السعودية"], answer: "الإمارات (العين)" },
+            { text: "تصل نسبة الفصام إلى 3% وهي من أعلى النسب عالمياً لدقة التسجيل والصراحة", options: ["الصين", "أمريكا", "السويد", "بريطانيا"], answer: "السويد" },
+            { text: "نسبة الفصام 1-1.5% وتشكل عبئاً اقتصادياً باهظاً تصل تكلفته لـ 100 مليار دولار", options: ["بريطانيا", "أمريكا", "كندا", "السويد"], answer: "أمريكا" },
+            { text: "رُصد سلوك تكرار بسيط بنسبة 10-15% بين طلاب الجامعات الأسوياء (وسواس قهري)", options: ["مصر", "قطر/البحرين", "لبنان", "الإمارات"], answer: "قطر/البحرين" },
+            { text: "سُجل أعلى معدل لاضطرابات الذهان مدى الحياة بنسبة 25.8% بسبب النزوح والحروب", options: ["المغرب", "فلسطين", "لبنان", "العراق"], answer: "لبنان" },
+            { text: "ترتفع نسبة الفصام في الطبقات الاجتماعية الدنيا بسبب (الانجراف الاجتماعي Social Drift)", options: ["أمريكا", "السويد", "بريطانيا وأوروبا", "الصين"], answer: "بريطانيا وأوروبا" },
+            { text: "هوس نتف الشعر (Trichotillomania) يمثل 2% من الجمهور العام كشريحة عريضة", options: ["مصر", "كندا", "أمريكا", "لبنان"], answer: "كندا" }
         ];
 
         // Game 3: True / False
         const tfGameQuestions = [
-            { text: "الإناث أكثر عرضة للإصابة بالفصام في مرحلة الطفولة مقارنة بالذكور.", answer: false, explanation: "الفصام في الطفولة نادر جداً، وإذا حدث يميل أكثر للذكور." },
-            { text: "في ثنائي القطب، تعاني الإناث في مرحلة البلوغ من (التكرار السريع) ونوبات اكتئاب أطول.", answer: true, explanation: "صحيح، الإناث يملن لثنائي القطب II مع اكتئاب وتكرار سريع." },
-            { text: "الذكور يبدأ لديهم الوسواس القهري في الطفولة أبكر من الإناث.", answer: true, explanation: "نعم، 25% من الذكور يبدأ لديهم قبل العاشرة." },
-            { text: "نوبات العدوان الفجائي والمقامرة المرضية في مرحلة الشباب تكون متساوية بين الجنسين.", answer: false, explanation: "الذكور أعلى بكثير في الاندفاعيات العنيفة والمقامرة." },
-            { text: "في مصر، معظم مرضى الوسواس القهري المترددين على العيادات هم من الشباب بين 20-30 سنة.", answer: true, explanation: "معلومة صحيحة بنسبة 2.6% بالعيادات." },
-            { text: "هوس السرقة في مرحلة البلوغ منتشر بين الذكور لتلبية الاحتياجات المادية.", answer: false, explanation: "هوس السرقة (Kleptomania) أكثر في الإناث، ويكون لتخفيف القلق وليس لدافع مادي." }
+            { text: "الذكور يبدأ لديهم الوسواس القهري في الطفولة أبكر من الإناث بحوالي 25% قبل العاشرة ويترافق مع اللزمات (Tics).", answer: true, explanation: "إجابة دقيقة وصحيحة." },
+            { text: "في ثنائي القطب، تعاني الإناث في مرحلة البلوغ من نوبات هوس عنيفة تدفعهن للإدمان الكحولي أكثر من الذكور.", answer: false, explanation: "خطأ. الإناث يملن لثنائي القطب II مع اكتئاب أطول وتكرار سريع، والذكور هم الأكثر ارتباطاً بالإدمان الكحولي للسيطرة على الهوس." },
+            { text: "الإناث أكثر عرضة بكثير للإصابة بالفصام في مرحلة الطفولة مقارنة بالذكور.", answer: false, explanation: "خطأ. الفصام في الطفولة نادر جداً للطرفين، لكنه إن حدث يميل بقوة للذكور." },
+            { text: "نوبات العدوان الفجائي والمقامرة المرضية في مرحلة الشباب والبلوغ تميل بكثافة نحو الذكور وتلقي بهم في السجون.", answer: true, explanation: "صحيح، الاندفاعيات العنيفة والمخاطرة ذكورية بالأساس." },
+            { text: "في مصر، معظم مرضى الوسواس القهري المترددين على العيادات هم من كبار السن فوق 60 عاماً.", answer: false, explanation: "خطأ. معظم المترددين على العيادات المصرية من الشباب في المرحلة العمرية (20-30 سنة)." },
+            { text: "هوس السرقة (Kleptomania) في مرحلة البلوغ منتشر بين الإناث بهدف تلبية احتياجات مادية ملحة وشراء أغراض غالية.", answer: false, explanation: "خطأ. الإناث يسرقن أشياء ليس لها قيمة مادية كاستجابة قهرية لتفريغ وتخفيف التوتر، القلق، والاكتئاب." },
+            { text: "نسبة الفصام الكلية بين الذكور والإناث مدى الحياة هي نسبة متقاربة ومتساوية تقريباً (1:1).", answer: true, explanation: "صحيح تماماً، الاختلاف يكمن فقط في (سن البداية) و (شكل الأعراض)، لكن النسبة الكلية متساوية." }
         ];
 
         // --- App Component ---
@@ -264,7 +281,7 @@
                 let correctAnswerText = "";
                 if (gameType === 'gender') correctAnswerText = currentQ.answer === 'male' ? "الذكور 👨" : "الإناث 👩";
                 else if (gameType === 'country') correctAnswerText = currentQ.answer;
-                else if (gameType === 'tf') correctAnswerText = (currentQ.answer ? "صح ✅" : "خطأ ❌") + (currentQ.explanation ? `\n(${currentQ.explanation})` : "");
+                else if (gameType === 'tf') correctAnswerText = (currentQ.answer ? "صح ✅" : "خطأ ❌") + (currentQ.explanation ? `\n\n💡 التعليل:\n${currentQ.explanation}` : "");
 
                 setGameModal({
                     isCorrect,
@@ -291,17 +308,17 @@
                             <BrainIcon />
                         </div>
                         <h1 className="text-5xl md:text-7xl font-black title-font text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400 mb-6 drop-shadow-lg">
-                            موسوعة الأوبئة العقلية
+                            الموسوعة الشاملة
                         </h1>
-                        <p className="text-xl md:text-2xl text-slate-300 max-w-2xl leading-relaxed mb-10">
-                            تم تحديث المنصة لتشمل <strong className="text-pink-400">الفروق بين الذكور والإناث في كافة المراحل العمرية</strong> حسب تعليمات المقرر.
+                        <p className="text-xl md:text-2xl text-slate-300 max-w-3xl leading-relaxed mb-10">
+                            (النسخة الاحترافية) تم تفريغ <strong className="text-pink-400">كل كلمة ذُكرت بالمنهج</strong> عن الدول والفروق العمرية والجنسية حرفياً، بدون حذف أو اختصار لأي معلومة.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl">
                             <button onClick={() => setView('assignment')} className="flex-1 py-5 bg-gradient-to-l from-indigo-600 to-purple-600 hover:scale-105 rounded-2xl font-bold text-xl transition-transform shadow-[0_10px_30px_rgba(79,70,229,0.5)] border-2 border-indigo-400">
-                                <CompareIcon /> غرفة المقارنات <br/><span className="text-sm font-normal">(الأعمار والدول)</span>
+                                <CompareIcon /> المقارنة التفصيلية <br/><span className="text-sm font-normal">(اقرأ المنهج كاملاً هنا)</span>
                             </button>
                             <button onClick={() => setView('games_hub')} className="flex-1 py-5 bg-slate-800 border-2 border-emerald-500 hover:bg-slate-700 rounded-2xl font-bold text-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                                <TargetIcon /> أكاديمية الألعاب <br/><span className="text-sm font-normal">(اختبر الحفظ)</span>
+                                <TargetIcon /> أكاديمية الألعاب <br/><span className="text-sm font-normal">(اختبر الحفظ للشفوي)</span>
                             </button>
                         </div>
                     </div>
@@ -312,21 +329,21 @@
                 const data = comparisonsData[activeTab];
                 return (
                     <div className="container mx-auto px-4 py-8 max-w-6xl slide-up">
-                        <button onClick={() => setView('intro')} className="mb-6 px-6 py-2 bg-slate-800 text-sky-400 rounded-lg border border-sky-900 hover:bg-slate-700 transition">
+                        <button onClick={() => setView('intro')} className="mb-6 px-6 py-2 bg-slate-800 text-sky-400 rounded-lg border border-sky-900 hover:bg-slate-700 transition shadow-lg">
                             🔙 العودة للرئيسية
                         </button>
                         
-                        <h2 className="text-4xl font-black text-center mb-8 text-sky-400 title-font">
-                            غرفة عمليات المقارنات 🌍
+                        <h2 className="text-4xl font-black text-center mb-8 text-sky-400 title-font drop-shadow-lg">
+                            المقارنة الشاملة (بدون حذف) 🌍
                         </h2>
 
                         {/* Tabs */}
-                        <div className="flex flex-wrap justify-center gap-2 mb-10">
+                        <div className="flex flex-wrap justify-center gap-3 mb-10">
                             {disorders.map(d => (
                                 <button 
                                     key={d} 
                                     onClick={() => setActiveTab(d)}
-                                    className={`px-6 py-3 rounded-full font-bold text-lg transition-all ${activeTab === d ? 'bg-sky-500 text-white shadow-[0_0_15px_rgba(56,189,248,0.6)]' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+                                    className={`px-8 py-3 rounded-full font-bold text-lg transition-all ${activeTab === d ? 'bg-sky-500 text-white shadow-[0_0_20px_rgba(56,189,248,0.7)] scale-105' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700'}`}
                                 >
                                     {d}
                                 </button>
@@ -334,69 +351,71 @@
                         </div>
 
                         {/* Dashboard */}
-                        <div className="fade-in">
-                            {/* Countries */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                                <div className="bg-slate-900/90 border border-emerald-500/50 rounded-2xl p-6 shadow-[0_10px_30px_rgba(16,185,129,0.2)]">
-                                    <h3 className="text-2xl font-black text-emerald-400 mb-6 border-b border-emerald-500/30 pb-3 text-center">4 دول عربية 🌴</h3>
-                                    <ul className="space-y-4">
+                        <div className="fade-in space-y-10">
+                            {/* Countries Compare */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Arab Card (Scrollable) */}
+                                <div className="bg-slate-900 border border-emerald-500/50 rounded-2xl p-6 shadow-[0_10px_40px_rgba(16,185,129,0.2)] flex flex-col h-[500px]">
+                                    <h3 className="text-2xl font-black text-emerald-400 mb-4 border-b border-emerald-500/30 pb-3 text-center shrink-0">كل الدول العربية المذكورة 🌴</h3>
+                                    <ul className="space-y-4 overflow-y-auto inner-scroll pr-3 pb-2">
                                         {data.arab.map((item, i) => (
-                                            <li key={i} className="bg-slate-800 p-4 rounded-xl border-r-4 border-emerald-500">
-                                                <strong className="text-white text-lg block mb-1">{item.country}</strong>
-                                                <span className="text-slate-300 text-sm leading-relaxed">{item.fact}</span>
+                                            <li key={i} className="bg-slate-800 p-4 rounded-xl border-r-4 border-emerald-500 shadow-md">
+                                                <strong className="text-white text-lg block mb-2">{item.country}</strong>
+                                                <span className="text-slate-300 text-base leading-relaxed block">{item.fact}</span>
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
-                                <div className="bg-slate-900/90 border border-sky-500/50 rounded-2xl p-6 shadow-[0_10px_30px_rgba(56,189,248,0.2)]">
-                                    <h3 className="text-2xl font-black text-sky-400 mb-6 border-b border-sky-500/30 pb-3 text-center">4 دول أجنبية 🗽</h3>
-                                    <ul className="space-y-4">
+                                {/* Foreign Card (Scrollable) */}
+                                <div className="bg-slate-900 border border-sky-500/50 rounded-2xl p-6 shadow-[0_10px_40px_rgba(56,189,248,0.2)] flex flex-col h-[500px]">
+                                    <h3 className="text-2xl font-black text-sky-400 mb-4 border-b border-sky-500/30 pb-3 text-center shrink-0">كل الدول الأجنبية والعالم 🗽</h3>
+                                    <ul className="space-y-4 overflow-y-auto inner-scroll pr-3 pb-2">
                                         {data.foreign.map((item, i) => (
-                                            <li key={i} className="bg-slate-800 p-4 rounded-xl border-r-4 border-sky-500">
-                                                <strong className="text-white text-lg block mb-1">{item.country}</strong>
-                                                <span className="text-slate-300 text-sm leading-relaxed">{item.fact}</span>
+                                            <li key={i} className="bg-slate-800 p-4 rounded-xl border-r-4 border-sky-500 shadow-md">
+                                                <strong className="text-white text-lg block mb-2">{item.country}</strong>
+                                                <span className="text-slate-300 text-base leading-relaxed block">{item.fact}</span>
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
                             </div>
 
-                            {/* Age Stages Timeline Component */}
-                            <div className="bg-gradient-to-b from-slate-900 to-slate-950 border border-indigo-500/50 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                            {/* Detailed Age/Gender Stages Component */}
+                            <div className="bg-gradient-to-b from-slate-900 to-slate-950 border border-indigo-500/50 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-                                <h3 className="text-3xl font-black text-center text-white mb-10 title-font">مخطط الفروق العمرية والجنسية ⏳</h3>
+                                <h3 className="text-3xl font-black text-center text-white mb-12 title-font">التفصيل الشامل: الفروق العمرية والجنسية ⏳</h3>
                                 
-                                <div className="space-y-8">
+                                <div className="space-y-12">
                                     {data.stages.map((stage, idx) => (
                                         <div key={idx} className="relative">
                                             {/* Center Line for Desktop */}
-                                            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-indigo-900/50 transform -translate-x-1/2 rounded-full"></div>
+                                            <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-1 bg-indigo-900/50 transform -translate-x-1/2 rounded-full"></div>
                                             
                                             {/* Phase Label */}
-                                            <div className="flex justify-center mb-4 relative z-10">
-                                                <div className="bg-indigo-600 px-6 py-2 rounded-full border-2 border-indigo-400 shadow-[0_0_15px_rgba(79,70,229,0.5)] flex items-center gap-3">
+                                            <div className="flex justify-center mb-6 relative z-10">
+                                                <div className="bg-indigo-600 px-8 py-3 rounded-full border-2 border-indigo-400 shadow-[0_0_20px_rgba(79,70,229,0.5)] flex items-center gap-3">
                                                     {stage.icon}
-                                                    <span className="font-bold text-xl text-white">{stage.phase}</span>
+                                                    <span className="font-black text-2xl text-white">{stage.phase}</span>
                                                 </div>
                                             </div>
 
                                             {/* Male/Female Comparison Boxes */}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
                                                 {/* Male Box (Right) */}
-                                                <div className="bg-blue-900/20 border-r-4 border-blue-500 p-5 rounded-2xl md:text-left flex flex-col md:flex-row-reverse items-center md:items-start gap-4 hover:bg-blue-900/30 transition-colors">
-                                                    <div className="text-4xl shrink-0">👨</div>
-                                                    <div>
-                                                        <h4 className="font-bold text-blue-400 mb-2 md:text-right text-center">الذكور</h4>
-                                                        <p className="text-slate-300 text-sm leading-relaxed md:text-right text-center">{stage.male}</p>
+                                                <div className="bg-blue-900/20 border-t-4 lg:border-t-0 lg:border-r-4 border-blue-500 p-6 rounded-2xl flex flex-col lg:flex-row-reverse items-center lg:items-start gap-6 hover:bg-blue-900/30 transition-colors shadow-lg">
+                                                    <div className="text-5xl shrink-0 p-3 bg-slate-900/50 rounded-full border border-blue-500/30">👨</div>
+                                                    <div className="w-full">
+                                                        <h4 className="font-black text-xl text-blue-400 mb-4 lg:text-right text-center border-b border-blue-900 pb-2">الذكور</h4>
+                                                        <p className="text-slate-300 text-base leading-loose lg:text-right text-right whitespace-pre-line">{stage.male}</p>
                                                     </div>
                                                 </div>
 
                                                 {/* Female Box (Left) */}
-                                                <div className="bg-pink-900/20 border-l-4 border-pink-500 p-5 rounded-2xl flex flex-col md:flex-row items-center md:items-start gap-4 hover:bg-pink-900/30 transition-colors">
-                                                    <div className="text-4xl shrink-0">👩</div>
-                                                    <div>
-                                                        <h4 className="font-bold text-pink-400 mb-2 text-center md:text-left">الإناث</h4>
-                                                        <p className="text-slate-300 text-sm leading-relaxed text-center md:text-left">{stage.female}</p>
+                                                <div className="bg-pink-900/20 border-t-4 lg:border-t-0 lg:border-l-4 border-pink-500 p-6 rounded-2xl flex flex-col lg:flex-row items-center lg:items-start gap-6 hover:bg-pink-900/30 transition-colors shadow-lg">
+                                                    <div className="text-5xl shrink-0 p-3 bg-slate-900/50 rounded-full border border-pink-500/30">👩</div>
+                                                    <div className="w-full">
+                                                        <h4 className="font-black text-xl text-pink-400 mb-4 text-center lg:text-left border-b border-pink-900 pb-2">الإناث</h4>
+                                                        <p className="text-slate-300 text-base leading-loose text-right lg:text-left whitespace-pre-line" dir="rtl">{stage.female}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -411,35 +430,35 @@
 
             if (view === 'games_hub') {
                 return (
-                    <div className="container mx-auto px-4 py-12 max-w-5xl slide-up">
+                    <div className="container mx-auto px-4 py-12 max-w-6xl slide-up">
                         <button onClick={() => setView('intro')} className="mb-6 px-6 py-2 bg-slate-800 text-sky-400 rounded-lg border border-sky-900 hover:bg-slate-700 transition">
                             🔙 العودة للرئيسية
                         </button>
                         
-                        <h2 className="text-4xl font-black text-center mb-10 text-emerald-400 title-font">
-                            أكاديمية الألعاب 🎮
+                        <h2 className="text-4xl font-black text-center mb-10 text-emerald-400 title-font drop-shadow-lg">
+                            أكاديمية الألعاب الشاملة 🎮
                         </h2>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-slate-800 border-2 border-indigo-500/50 p-8 rounded-3xl hover:scale-105 transition-transform flex flex-col items-center text-center group">
-                                <div className="text-6xl mb-4">⚔️</div>
-                                <h3 className="text-2xl font-bold text-indigo-300 mb-3">تحدي الجنسين والأعمار</h3>
-                                <p className="text-slate-400 mb-6 flex-1">من الأكثر عرضة في الطفولة؟ من في المراهقة؟ اختبر حفظك.</p>
-                                <button onClick={() => startGame('gender')} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-white flex justify-center">العب الآن</button>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="bg-slate-800 border-2 border-indigo-500/50 p-8 rounded-3xl hover:-translate-y-2 transition-all flex flex-col items-center text-center group shadow-xl">
+                                <div className="text-7xl mb-6">⚔️</div>
+                                <h3 className="text-2xl font-black text-indigo-300 mb-4">تحدي الجنسين والأعمار</h3>
+                                <p className="text-slate-400 mb-8 flex-1 leading-relaxed">الأسئلة تم تحديثها لتشمل أدق التفاصيل في المنهج عن الطفولة والمراهقة والبلوغ.</p>
+                                <button onClick={() => startGame('gender')} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-xl text-white shadow-[0_5px_15px_rgba(79,70,229,0.4)]">العب الآن</button>
                             </div>
 
-                            <div className="bg-slate-800 border-2 border-emerald-500/50 p-8 rounded-3xl hover:scale-105 transition-transform flex flex-col items-center text-center group">
-                                <div className="text-6xl mb-4">🌍</div>
-                                <h3 className="text-2xl font-bold text-emerald-300 mb-3">تحدي الدول</h3>
-                                <p className="text-slate-400 mb-6 flex-1">طابق المعلومة الإحصائية بالدولة الصحيحة (عربية وأجنبية).</p>
-                                <button onClick={() => startGame('country')} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold text-white flex justify-center">العب الآن</button>
+                            <div className="bg-slate-800 border-2 border-emerald-500/50 p-8 rounded-3xl hover:-translate-y-2 transition-all flex flex-col items-center text-center group shadow-xl">
+                                <div className="text-7xl mb-6">🌍</div>
+                                <h3 className="text-2xl font-black text-emerald-300 mb-4">تحدي كافة الدول</h3>
+                                <p className="text-slate-400 mb-8 flex-1 leading-relaxed">طابق المعلومة الإحصائية الدقيقة جداً بالدولة الصحيحة (عربية وأجنبية وعالمية).</p>
+                                <button onClick={() => startGame('country')} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold text-xl text-white shadow-[0_5px_15px_rgba(16,185,129,0.4)]">العب الآن</button>
                             </div>
 
-                            <div className="bg-slate-800 border-2 border-orange-500/50 p-8 rounded-3xl hover:scale-105 transition-transform flex flex-col items-center text-center group">
-                                <div className="text-6xl mb-4">⚡</div>
-                                <h3 className="text-2xl font-bold text-orange-300 mb-3">صح أم خطأ؟</h3>
-                                <p className="text-slate-400 mb-6 flex-1">أسئلة سريعة مختلطة تقيس دقة تركيزك في تفاصيل المقارنات.</p>
-                                <button onClick={() => startGame('tf')} className="w-full py-3 bg-orange-600 hover:bg-orange-500 rounded-xl font-bold text-white flex justify-center">العب الآن</button>
+                            <div className="bg-slate-800 border-2 border-orange-500/50 p-8 rounded-3xl hover:-translate-y-2 transition-all flex flex-col items-center text-center group shadow-xl">
+                                <div className="text-7xl mb-6">⚡</div>
+                                <h3 className="text-2xl font-black text-orange-300 mb-4">صح أم خطأ؟ (بالتعليل)</h3>
+                                <p className="text-slate-400 mb-8 flex-1 leading-relaxed">أسئلة فخوخ سريعة تقيس دقة تركيزك مع ظهور التعليل بعد الإجابة.</p>
+                                <button onClick={() => startGame('tf')} className="w-full py-4 bg-orange-600 hover:bg-orange-500 rounded-xl font-bold text-xl text-white shadow-[0_5px_15px_rgba(249,115,22,0.4)]">العب الآن</button>
                             </div>
                         </div>
                     </div>
@@ -453,32 +472,32 @@
 
                 return (
                     <div className="container mx-auto px-4 py-12 max-w-4xl slide-up text-center">
-                        <div className={`flex justify-between items-center mb-10 bg-slate-800 p-4 rounded-xl border border-${themeColor}-700`}>
-                            <button onClick={() => setView('games_hub')} className="text-slate-400 hover:text-white">🔙 خروج</button>
-                            <span className={`text-${themeColor}-400 font-bold`}>السؤال {gameQIndex + 1} / {currentQuestions.length}</span>
-                            <span className="text-emerald-400 font-bold">النقاط: {gameScore}</span>
+                        <div className={`flex justify-between items-center mb-10 bg-slate-800 p-5 rounded-2xl border border-${themeColor}-700 shadow-lg`}>
+                            <button onClick={() => setView('games_hub')} className="text-slate-400 hover:text-white font-bold">🔙 خروج</button>
+                            <span className={`text-${themeColor}-400 font-black text-lg`}>السؤال {gameQIndex + 1} من {currentQuestions.length}</span>
+                            <span className="text-emerald-400 font-black text-lg bg-emerald-900/30 px-4 py-1 rounded-full">النقاط: {gameScore}</span>
                         </div>
 
-                        <div className={`bg-slate-900 p-8 md:p-12 rounded-[2rem] border border-${themeColor}-500/30 shadow-2xl mb-10`}>
-                            <h2 className="text-2xl md:text-3xl font-black text-white leading-loose mb-12">"{q.text}"</h2>
+                        <div className={`bg-slate-900 p-8 md:p-14 rounded-[2.5rem] border-2 border-${themeColor}-500/30 shadow-[0_0_50px_rgba(0,0,0,0.5)] mb-10`}>
+                            <h2 className="text-2xl md:text-4xl font-black text-white leading-loose mb-14 drop-shadow-md">"{q.text}"</h2>
                             
                             {gameType === 'gender' && (
                                 <div className="flex flex-col sm:flex-row gap-8 justify-center">
-                                    <button onClick={() => handleAnswerClick('male')} className="flex-1 bg-slate-800 hover:bg-blue-900/50 border-2 border-blue-500/50 p-6 rounded-3xl transition-transform hover:scale-105">
-                                        <MaleIcon />
-                                        <span className="text-2xl font-black text-blue-400 block mt-2">الذكور 👨</span>
+                                    <button onClick={() => handleAnswerClick('male')} className="flex-1 bg-slate-800 hover:bg-blue-900/50 border-2 border-blue-500/50 p-8 rounded-[2rem] transition-transform hover:scale-105 shadow-xl group">
+                                        <div className="text-6xl mb-4 group-hover:-translate-y-2 transition-transform">👨</div>
+                                        <span className="text-3xl font-black text-blue-400 block mt-2">الذكور</span>
                                     </button>
-                                    <button onClick={() => handleAnswerClick('female')} className="flex-1 bg-slate-800 hover:bg-pink-900/50 border-2 border-pink-500/50 p-6 rounded-3xl transition-transform hover:scale-105">
-                                        <FemaleIcon />
-                                        <span className="text-2xl font-black text-pink-400 block mt-2">الإناث 👩</span>
+                                    <button onClick={() => handleAnswerClick('female')} className="flex-1 bg-slate-800 hover:bg-pink-900/50 border-2 border-pink-500/50 p-8 rounded-[2rem] transition-transform hover:scale-105 shadow-xl group">
+                                        <div className="text-6xl mb-4 group-hover:-translate-y-2 transition-transform">👩</div>
+                                        <span className="text-3xl font-black text-pink-400 block mt-2">الإناث</span>
                                     </button>
                                 </div>
                             )}
 
                             {gameType === 'country' && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     {q.options.map((opt, idx) => (
-                                        <button key={idx} onClick={() => handleAnswerClick(opt)} className="py-5 text-xl font-bold bg-slate-800 hover:bg-emerald-600 border-2 border-slate-600 hover:border-emerald-400 rounded-xl text-white transition-colors">
+                                        <button key={idx} onClick={() => handleAnswerClick(opt)} className="py-6 px-4 text-xl md:text-2xl font-bold bg-slate-800 hover:bg-emerald-600 border-2 border-slate-600 hover:border-emerald-400 rounded-2xl text-white transition-colors shadow-lg">
                                             {opt}
                                         </button>
                                     ))}
@@ -486,11 +505,11 @@
                             )}
 
                             {gameType === 'tf' && (
-                                <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                                    <button onClick={() => handleAnswerClick(true)} className="flex-1 py-6 text-2xl font-bold bg-emerald-900/40 hover:bg-emerald-600 border-2 border-emerald-500/50 rounded-2xl text-emerald-300 hover:text-white transition-colors">
+                                <div className="flex flex-col sm:flex-row gap-8 justify-center">
+                                    <button onClick={() => handleAnswerClick(true)} className="flex-1 py-8 text-3xl font-black bg-emerald-900/40 hover:bg-emerald-600 border-2 border-emerald-500/50 rounded-[2rem] text-emerald-300 hover:text-white transition-colors shadow-xl">
                                         صح ✅
                                     </button>
-                                    <button onClick={() => handleAnswerClick(false)} className="flex-1 py-6 text-2xl font-bold bg-rose-900/40 hover:bg-rose-600 border-2 border-rose-500/50 rounded-2xl text-rose-300 hover:text-white transition-colors">
+                                    <button onClick={() => handleAnswerClick(false)} className="flex-1 py-8 text-3xl font-black bg-rose-900/40 hover:bg-rose-600 border-2 border-rose-500/50 rounded-[2rem] text-rose-300 hover:text-white transition-colors shadow-xl">
                                         خطأ ❌
                                     </button>
                                 </div>
@@ -498,18 +517,26 @@
                         </div>
 
                         {gameModal && (
-                            <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                                <div className="bg-slate-900 p-10 rounded-[2rem] border-2 max-w-lg w-full text-center bounce-in" style={{ borderColor: gameModal.isCorrect ? '#34d399' : '#fb7185' }}>
-                                    <div className="text-7xl mb-4">{gameModal.isCorrect ? '🎯' : '❌'}</div>
-                                    <h3 className={`text-3xl font-black mb-6 ${gameModal.isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>{gameModal.title}</h3>
+                            <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                                <div className="bg-slate-900 p-10 md:p-14 rounded-[3rem] border-2 max-w-2xl w-full text-center bounce-in shadow-[0_0_80px_rgba(0,0,0,0.8)]" style={{ borderColor: gameModal.isCorrect ? '#34d399' : '#fb7185' }}>
+                                    <div className="text-8xl mb-6 drop-shadow-xl">{gameModal.isCorrect ? '🎯' : '❌'}</div>
+                                    <h3 className={`text-4xl font-black mb-8 ${gameModal.isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>{gameModal.title}</h3>
+                                    
                                     {!gameModal.isCorrect && (
-                                        <div className="mb-8 p-4 bg-rose-950/50 rounded-xl border border-rose-500/30">
-                                            <p className="text-slate-300 mb-2">الإجابة الصحيحة هي:</p>
-                                            <p className="text-xl font-bold text-white whitespace-pre-wrap">{gameModal.correctText}</p>
+                                        <div className="mb-8 p-6 bg-slate-800 rounded-2xl border border-slate-600">
+                                            <p className="text-slate-400 mb-3 text-lg">الإجابة الصحيحة والتعليل:</p>
+                                            <p className="text-2xl font-bold text-white whitespace-pre-line leading-relaxed">{gameModal.correctText}</p>
                                         </div>
                                     )}
-                                    <button onClick={nextGameQ} className={`w-full py-4 text-slate-900 rounded-xl font-black text-xl transition-colors ${gameModal.isCorrect ? 'bg-emerald-400 hover:bg-emerald-300' : 'bg-slate-200 hover:bg-white'}`}>
-                                        التالي ⏭️
+                                    
+                                    {gameModal.isCorrect && gameType === 'tf' && gameModal.correctText.includes('💡') && (
+                                         <div className="mb-8 p-6 bg-slate-800 rounded-2xl border border-slate-600">
+                                            <p className="text-2xl font-bold text-white whitespace-pre-line leading-relaxed">{gameModal.correctText.replace('صح ✅\n\n', '')}</p>
+                                        </div>
+                                    )}
+
+                                    <button onClick={nextGameQ} className={`w-full py-5 text-slate-900 rounded-2xl font-black text-2xl transition-colors shadow-lg ${gameModal.isCorrect ? 'bg-emerald-400 hover:bg-emerald-300' : 'bg-slate-200 hover:bg-white'}`}>
+                                        السؤال التالي ⏭️
                                     </button>
                                 </div>
                             </div>
@@ -521,13 +548,13 @@
             if (view === 'game_result') {
                 return (
                     <div className="container mx-auto px-4 py-16 text-center slide-up flex justify-center items-center min-h-screen">
-                        <div className="bg-slate-800 p-12 rounded-[2rem] border border-sky-500/50 max-w-2xl w-full shadow-2xl">
-                            <div className="text-7xl mb-6">🏆</div>
-                            <h2 className="text-4xl font-black text-white mb-6">انتهى التحدي!</h2>
-                            <p className="text-2xl text-slate-300 mb-10">جاوبت صح على <span className="text-emerald-400 font-bold">{gameScore}</span> من <span className="text-sky-400 font-bold">{getActiveQuestionsList().length}</span></p>
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <button onClick={() => setView('games_hub')} className="flex-1 py-4 bg-sky-600 hover:bg-sky-500 rounded-xl font-bold text-xl text-white">العودة للألعاب</button>
-                                <button onClick={() => setView('intro')} className="flex-1 py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-xl text-white">الرئيسية</button>
+                        <div className="bg-slate-800 p-14 rounded-[3rem] border-2 border-sky-500/50 max-w-2xl w-full shadow-[0_0_60px_rgba(14,165,233,0.3)]">
+                            <div className="text-8xl mb-8 drop-shadow-lg">🏆</div>
+                            <h2 className="text-5xl font-black text-white mb-8">انتهى التحدي!</h2>
+                            <p className="text-3xl text-slate-300 mb-12 bg-slate-900/50 p-6 rounded-2xl border border-slate-700">جاوبت صح على <span className="text-emerald-400 font-black text-4xl">{gameScore}</span> من <span className="text-sky-400 font-black text-4xl">{getActiveQuestionsList().length}</span></p>
+                            <div className="flex flex-col sm:flex-row gap-6">
+                                <button onClick={() => setView('games_hub')} className="flex-1 py-5 bg-sky-600 hover:bg-sky-500 rounded-2xl font-black text-xl text-white shadow-xl hover:-translate-y-1 transition-transform">العودة للألعاب</button>
+                                <button onClick={() => setView('intro')} className="flex-1 py-5 bg-slate-700 hover:bg-slate-600 rounded-2xl font-black text-xl text-white shadow-xl hover:-translate-y-1 transition-transform">الرئيسية</button>
                             </div>
                         </div>
                     </div>
